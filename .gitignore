@@ -28,3 +28,11 @@
 *.out
 *.app
 
+# visualstudio
+.vs/
+Release/
+Debug/
+x64/
+*.cln
+*.vcxproj
+*.vcxproj.*

@@ -148,7 +148,7 @@ bool kds::loader::init() {
 		vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(KDS_VULKAN_LIBRARY, "vkGetInstanceProcAddr"));
 	#elif defined(KDS_OS_WINDOWS)
 		KDS_VULKAN_LIBRARY = LoadLibrary("vulkan-1.dll");
-		vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(GetProcAddr(KDS_VULKAN_LIBRARY, "vkGetInstanceProcAddr"));
+		vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(GetProcAddress(KDS_VULKAN_LIBRARY, "vkGetInstanceProcAddr"));
 	#endif
 
 	if (vkGetInstanceProcAddr == nullptr) {
