@@ -33,6 +33,7 @@
 Release/
 Debug/
 x64/
+*.sln
 *.cln
 *.vcxproj
 *.vcxproj.*
