@@ -13,9 +13,11 @@
 
 #if defined(__linux__) || defined(__UNIX__)
 	#define KDS_OS_LINUX
+	#define VULKAN_LIBRARY_TYPE void*
 	#include <dlfcn.h>
 #elif defined(__MINGW32__) || defined(_WIN32)
 	#define KDS_OS_WINDOWS
+	#define VULKAN_LIBRARY_TYPE HMODULE
  	#include <Windows.h>
 #endif
 
@@ -25,29 +27,39 @@ extern "C" {
 
 namespace kds {
 	namespace loader {
-		/// init the VulkanWL library
-		/// Loads the vulkan loader and retrives the global level function pointers from it
+		/// init the Vulkan loader
+		/// Retrives the global level function pointers from it
 		///
 		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool init();
+		bool init(VULKAN_LIBRARY_TYPE lib);
 
-		/// Terminates the VulkanWL library
-		/// Closes the vulkan loader, no vulkan functions can be called after calling this
-		void terminate();
+		/// Terminates the Vulkan loader
+		/// No vulkan functions can be called after calling this
+		void terminate(VULKAN_LIBRARY_TYPE lib);
 
 		/// Loads the instance-level function pointers
 		///
 		/// \param instance A VALID vulkan instance (after creating it with vkCreateInstance)
 		///
 		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool loadInstanceLevelFunctions(VkInstance instance);
+		bool loadInstanceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
+
+		/// Loads the instance-level extensions function pointers
+		///
+		/// The requiered extensions MUST be enabled BEFORE calling this function, or the program will segfault
+		///
+		/// \param instance A VALID vulkan instance (after creating it with vkCreateInstance)
+		///
+		/// \return false if anything couldn't be loaded, of true if everything went fine
+		bool loadInstanceLevelExtensionFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
 
 		/// Loads the device-level function pointers
 		///
 		/// \param device A VALID vulkan device (after creating it with vkCreateDevice)
 		///
 		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool loadDeviceLevelFunctions(VkDevice device);
+		bool loadDeviceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkDevice device);
+
 	} // namespace loader
 } // namespace kds
 
@@ -64,13 +76,6 @@ namespace kds {
 #define KDS_LOAD_INSTANCE_LEVEL(fun) fun = reinterpret_cast<PFN_##fun>(vkGetInstanceProcAddr(instance, #fun)); KDS_CHECK_LOADING(fun);
 #define KDS_LOAD_DEVICE_LEVEL(fun) fun = reinterpret_cast<PFN_##fun>(vkGetDeviceProcAddr(device, #fun)); KDS_CHECK_LOADING(fun);
 
-// vulkan library loaded from .so lib
-#ifdef KDS_OS_LINUX
-	extern void *KDS_VULKAN_LIBRARY;
-#elif defined(KDS_OS_WINDOWS)
-	extern HMODULE KDS_VULKAN_LIBRARY;
-#endif
-
 // declare exported function
 KDS_DECL_EXTERN(vkGetInstanceProcAddr);
 
@@ -81,12 +86,15 @@ KDS_DECL_EXTERN(vkEnumerateInstanceLayerProperties);
 
 // declare instance level functions
 KDS_DECL_EXTERN(vkEnumeratePhysicalDevices);
+KDS_DECL_EXTERN(vkEnumerateDeviceExtensionProperties);
 KDS_DECL_EXTERN(vkGetPhysicalDeviceProperties);
 KDS_DECL_EXTERN(vkGetPhysicalDeviceFeatures);
 KDS_DECL_EXTERN(vkGetPhysicalDeviceQueueFamilyProperties);
 KDS_DECL_EXTERN(vkCreateDevice);
 KDS_DECL_EXTERN(vkGetDeviceProcAddr);
 KDS_DECL_EXTERN(vkDestroyInstance);
+KDS_DECL_EXTERN(vkCreateDebugReportCallbackEXT);
+KDS_DECL_EXTERN(vkDestroyDebugReportCallbackEXT);
 
 // declare device level functions
 KDS_DECL_EXTERN(vkDestroyDevice);
@@ -135,6 +143,7 @@ KDS_DECL_EXTERN(vkCreateShaderModule);
 KDS_DECL_EXTERN(vkDestroyShaderModule);
 KDS_DECL_EXTERN(vkCreatePipelineCache);
 KDS_DECL_EXTERN(vkDestroyPipelineCache);
+KDS_DECL_EXTERN(vkDestroyPipelineLayout);
 KDS_DECL_EXTERN(vkGetPipelineCacheData);
 KDS_DECL_EXTERN(vkMergePipelineCaches);
 KDS_DECL_EXTERN(vkCreateGraphicsPipelines);
@@ -206,6 +215,19 @@ KDS_DECL_EXTERN(vkCmdBeginRenderPass);
 KDS_DECL_EXTERN(vkCmdNextSubpass);
 KDS_DECL_EXTERN(vkCmdEndRenderPass);
 KDS_DECL_EXTERN(vkCmdExecuteCommands);
+
+// KHR extension functions
+KDS_DECL_EXTERN(vkGetPhysicalDeviceSurfaceSupportKHR);
+KDS_DECL_EXTERN(vkGetPhysicalDeviceSurfacePresentModesKHR);
+KDS_DECL_EXTERN(vkGetPhysicalDeviceSurfaceFormatsKHR);
+KDS_DECL_EXTERN(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
+KDS_DECL_EXTERN(vkQueuePresentKHR);
+KDS_DECL_EXTERN(vkAcquireNextImageKHR);
+KDS_DECL_EXTERN(vkGetSwapchainImagesKHR);
+KDS_DECL_EXTERN(vkCreateSwapchainKHR);
+KDS_DECL_EXTERN(vkDestroySwapchainKHR);
+KDS_DECL_EXTERN(vkDestroySurfaceKHR);
+
 
 #ifdef __cplusplus
 }

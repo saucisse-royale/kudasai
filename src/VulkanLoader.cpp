@@ -1,11 +1,5 @@
 #include "VulkanLoader.hpp"
 
-#ifdef KDS_OS_LINUX
-	void *KDS_VULKAN_LIBRARY;
-#elif defined(KDS_OS_WINDOWS)
-	HMODULE KDS_VULKAN_LIBRARY;
-#endif
-
 // Exported functions
 KDS_DECL(vkGetInstanceProcAddr);
 
@@ -16,12 +10,15 @@ KDS_DECL(vkEnumerateInstanceLayerProperties);
 
 // Instance level functions
 KDS_DECL(vkEnumeratePhysicalDevices);
+KDS_DECL(vkEnumerateDeviceExtensionProperties);
 KDS_DECL(vkGetPhysicalDeviceProperties);
 KDS_DECL(vkGetPhysicalDeviceFeatures);
 KDS_DECL(vkGetPhysicalDeviceQueueFamilyProperties);
 KDS_DECL(vkCreateDevice);
 KDS_DECL(vkGetDeviceProcAddr);
 KDS_DECL(vkDestroyInstance);
+KDS_DECL(vkCreateDebugReportCallbackEXT);
+KDS_DECL(vkDestroyDebugReportCallbackEXT);
 
 // Device level functions
 KDS_DECL(vkDestroyDevice);
@@ -70,6 +67,7 @@ KDS_DECL(vkCreateShaderModule);
 KDS_DECL(vkDestroyShaderModule);
 KDS_DECL(vkCreatePipelineCache);
 KDS_DECL(vkDestroyPipelineCache);
+KDS_DECL(vkDestroyPipelineLayout);
 KDS_DECL(vkGetPipelineCacheData);
 KDS_DECL(vkMergePipelineCaches);
 KDS_DECL(vkCreateGraphicsPipelines);
@@ -142,13 +140,25 @@ KDS_DECL(vkCmdNextSubpass);
 KDS_DECL(vkCmdEndRenderPass);
 KDS_DECL(vkCmdExecuteCommands);
 
-bool kds::loader::init() {
+// KHR extension functions
+KDS_DECL(vkGetPhysicalDeviceSurfaceSupportKHR);
+KDS_DECL(vkGetPhysicalDeviceSurfacePresentModesKHR);
+KDS_DECL(vkGetPhysicalDeviceSurfaceFormatsKHR);
+KDS_DECL(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
+KDS_DECL(vkQueuePresentKHR);
+KDS_DECL(vkAcquireNextImageKHR);
+KDS_DECL(vkGetSwapchainImagesKHR);
+KDS_DECL(vkCreateSwapchainKHR);
+KDS_DECL(vkDestroySwapchainKHR);
+KDS_DECL(vkDestroySurfaceKHR);
+
+bool kds::loader::init(VULKAN_LIBRARY_TYPE lib) {
 	#ifdef KDS_OS_LINUX
-		KDS_VULKAN_LIBRARY = dlopen("libvulkan.so", RTLD_NOW);
-		vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(KDS_VULKAN_LIBRARY, "vkGetInstanceProcAddr"));
+		lib = dlopen("libvulkan.so", RTLD_NOW);
+		vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(lib, "vkGetInstanceProcAddr"));
 	#elif defined(KDS_OS_WINDOWS)
-		KDS_VULKAN_LIBRARY = LoadLibrary("vulkan-1.dll");
-		vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(GetProcAddress(KDS_VULKAN_LIBRARY, "vkGetInstanceProcAddr"));
+		lib = LoadLibrary("vulkan-1.dll");
+		vkGetInstanceProcAddr = reinterpret_cast<PFN_vkGetInstanceProcAddr>(GetProcAddress(lib, "vkGetInstanceProcAddr"));
 	#endif
 
 	if (vkGetInstanceProcAddr == nullptr) {
@@ -163,13 +173,14 @@ bool kds::loader::init() {
 	return true;
 }
 
-bool kds::loader::loadInstanceLevelFunctions(VkInstance instance) {
-	if (instance == NULL) {
+bool kds::loader::loadInstanceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance) {
+	if (instance == nullptr) {
 		std::cerr << "KDS FATAL: tried to load instance level functions to a non valid instance\n";
 		return false;
 	}
 
 	KDS_LOAD_INSTANCE_LEVEL(vkEnumeratePhysicalDevices);
+	KDS_LOAD_INSTANCE_LEVEL(vkEnumerateDeviceExtensionProperties);
 	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceProperties);
 	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceFeatures);
 	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceQueueFamilyProperties);
@@ -180,7 +191,19 @@ bool kds::loader::loadInstanceLevelFunctions(VkInstance instance) {
 	return true;
 }
 
-bool kds::loader::loadDeviceLevelFunctions(VkDevice device) {
+bool kds::loader::loadInstanceLevelExtensionFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance) {
+	if (instance == nullptr) {
+		std::cerr << "KDS FATAL: tried to load instance level functions to a non valid instance\n";
+		return false;
+	}
+
+	KDS_LOAD_INSTANCE_LEVEL(vkCreateDebugReportCallbackEXT);
+	KDS_LOAD_INSTANCE_LEVEL(vkDestroyDebugReportCallbackEXT);
+
+	return true;
+}
+
+bool kds::loader::loadDeviceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkDevice device) {
 	if (device == nullptr) {
 		std::cerr << "KDS FATAL: tried to load device level functions to a non valid device\n";
 		return false;
@@ -232,6 +255,7 @@ bool kds::loader::loadDeviceLevelFunctions(VkDevice device) {
 	KDS_LOAD_DEVICE_LEVEL(vkDestroyShaderModule);
 	KDS_LOAD_DEVICE_LEVEL(vkCreatePipelineCache);
 	KDS_LOAD_DEVICE_LEVEL(vkDestroyPipelineCache);
+	KDS_LOAD_DEVICE_LEVEL(vkDestroyPipelineLayout);
 	KDS_LOAD_DEVICE_LEVEL(vkGetPipelineCacheData);
 	KDS_LOAD_DEVICE_LEVEL(vkMergePipelineCaches);
 	KDS_LOAD_DEVICE_LEVEL(vkCreateGraphicsPipelines);
@@ -304,13 +328,25 @@ bool kds::loader::loadDeviceLevelFunctions(VkDevice device) {
 	KDS_LOAD_DEVICE_LEVEL(vkCmdEndRenderPass);
 	KDS_LOAD_DEVICE_LEVEL(vkCmdExecuteCommands);
 
+	// KHR extensions
+	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfaceSupportKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfacePresentModesKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfaceFormatsKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkQueuePresentKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkAcquireNextImageKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkGetSwapchainImagesKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkCreateSwapchainKHR);
+	KDS_LOAD_DEVICE_LEVEL(vkDestroySwapchainKHR);
+
+
 	return true;
 }
 
-void kds::loader::terminate() {
+void kds::loader::terminate(VULKAN_LIBRARY_TYPE lib) {
 	#ifdef KDS_OS_LINUX
-		dlclose(KDS_VULKAN_LIBRARY);
+		dlclose(lib);
 	#elif defined(KDS_OS_WINDOWS)
-		FreeLibrary(KDS_VULKAN_LIBRARY);
+		FreeLibrary(lib);
 	#endif
 }

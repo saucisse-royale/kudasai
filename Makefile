@@ -1,4 +1,4 @@
-CC = g++ $(INCLUDES)
+CC = clang++ $(INCLUDES) $(STD)
 STD = -std=c++1z
 CPPFLAGS =
 
@@ -6,7 +6,7 @@ CPPFLAGS =
 INCLUDES = -I ./include/
 
 # link flags
-LINKS = -lpthread -ldl -L ./include
+LINKS = `pkg-config --libs glfw3` -lpthread -ldl -L ./include
 LD_LIBRARY_PATH= .
 
 SRC = $(wildcard */*.cpp) $(wildcard */*/*.cpp)
@@ -22,8 +22,7 @@ release: clean
 release: all
 
 install: release
-	mkdir Bin
-	mv $(EXEC) Bin
+	mv $(EXEC) bin
 
 all: $(EXEC)
 
@@ -34,4 +33,4 @@ $(EXEC): $(OBJ)
 	$(CC) $(STD) $(CFLAGS)  -c $< -o $@
 
 clean:
-	rm -rf *.o Bin $(EXEC)
+	rm -rf *.o $(EXEC)

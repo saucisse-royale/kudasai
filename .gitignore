@@ -13,10 +13,13 @@
 
 # visualstudio
 .vs/
-Release/
-Debug/
-x64/
 *.sln
 *.cln
 *.vcxproj
 *.vcxproj.*
+*.pdb
+*.tlog
+*.ilk
+*.log
+build/
+pdb/
