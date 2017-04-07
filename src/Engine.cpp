@@ -6,7 +6,6 @@ Engine::Engine()
 {
 }
 
-
 Engine::~Engine()
 {
 }
@@ -25,3 +24,4 @@ void Engine::render(const Drawer & drawer, float alpha)
 {
 	// TODO render all objects
 }
+

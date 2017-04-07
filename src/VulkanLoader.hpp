@@ -7,19 +7,20 @@
 /// It consists in several functions to retrieve the vulkan function pointers from the vulkan runtime loader
 /// (Not requiered if the app is statically linked with vulkan)
 
-#define VK_NO_PROTOTYPES
-#include <vulkan/vulkan.h>
-#include <iostream>
-
 #if defined(__linux__) || defined(__UNIX__)
 	#define KDS_OS_LINUX
+	#define VK_USE_PLATFORM_XCB_KHR
 	#define VULKAN_LIBRARY_TYPE void*
 	#include <dlfcn.h>
 #elif defined(__MINGW32__) || defined(_WIN32)
 	#define KDS_OS_WINDOWS
 	#define VULKAN_LIBRARY_TYPE HMODULE
- 	#include <Windows.h>
+	#include <Windows.h>
 #endif
+
+#define VK_NO_PROTOTYPES
+#include <vulkan/vulkan.h>
+#include <iostream>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,14 +45,14 @@ namespace kds {
 		/// \return false if anything couldn't be loaded, of true if everything went fine
 		bool loadInstanceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
 
-		/// Loads the instance-level extensions function pointers
+		/// Loads the instance-level debug extensions function pointers
 		///
 		/// The requiered extensions MUST be enabled BEFORE calling this function, or the program will segfault
 		///
 		/// \param instance A VALID vulkan instance (after creating it with vkCreateInstance)
 		///
 		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool loadInstanceLevelExtensionFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
+		bool loadInstanceLevelDebugFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
 
 		/// Loads the device-level function pointers
 		///
@@ -227,6 +228,9 @@ KDS_DECL_EXTERN(vkGetSwapchainImagesKHR);
 KDS_DECL_EXTERN(vkCreateSwapchainKHR);
 KDS_DECL_EXTERN(vkDestroySwapchainKHR);
 KDS_DECL_EXTERN(vkDestroySurfaceKHR);
+
+// test
+KDS_DECL_EXTERN(vkCreateXcbSurfaceKHR);
 
 
 #ifdef __cplusplus

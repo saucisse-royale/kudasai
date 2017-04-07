@@ -19,6 +19,7 @@ KDS_DECL(vkGetDeviceProcAddr);
 KDS_DECL(vkDestroyInstance);
 KDS_DECL(vkCreateDebugReportCallbackEXT);
 KDS_DECL(vkDestroyDebugReportCallbackEXT);
+KDS_DECL(vkCreateXcbSurfaceKHR);
 
 // Device level functions
 KDS_DECL(vkDestroyDevice);
@@ -152,6 +153,9 @@ KDS_DECL(vkCreateSwapchainKHR);
 KDS_DECL(vkDestroySwapchainKHR);
 KDS_DECL(vkDestroySurfaceKHR);
 
+//test
+//KDS_DECL(vkCreateXcbSurfaceKHR);
+
 bool kds::loader::init(VULKAN_LIBRARY_TYPE lib) {
 	#ifdef KDS_OS_LINUX
 		lib = dlopen("libvulkan.so", RTLD_NOW);
@@ -187,11 +191,17 @@ bool kds::loader::loadInstanceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance
 	KDS_LOAD_INSTANCE_LEVEL(vkCreateDevice);
 	KDS_LOAD_INSTANCE_LEVEL(vkGetDeviceProcAddr);
 	KDS_LOAD_INSTANCE_LEVEL(vkDestroyInstance);
+	KDS_LOAD_INSTANCE_LEVEL(vkCreateXcbSurfaceKHR);
+	KDS_LOAD_INSTANCE_LEVEL(vkDestroySurfaceKHR);
+	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceSurfaceSupportKHR);
+	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceSurfacePresentModesKHR);
+	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceSurfaceFormatsKHR);
+	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
 
 	return true;
 }
 
-bool kds::loader::loadInstanceLevelExtensionFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance) {
+bool kds::loader::loadInstanceLevelDebugFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance) {
 	if (instance == nullptr) {
 		std::cerr << "KDS FATAL: tried to load instance level functions to a non valid instance\n";
 		return false;
@@ -329,10 +339,6 @@ bool kds::loader::loadDeviceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkDevice dev
 	KDS_LOAD_DEVICE_LEVEL(vkCmdExecuteCommands);
 
 	// KHR extensions
-	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfaceSupportKHR);
-	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfacePresentModesKHR);
-	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfaceFormatsKHR);
-	KDS_LOAD_DEVICE_LEVEL(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
 	KDS_LOAD_DEVICE_LEVEL(vkQueuePresentKHR);
 	KDS_LOAD_DEVICE_LEVEL(vkAcquireNextImageKHR);
 	KDS_LOAD_DEVICE_LEVEL(vkGetSwapchainImagesKHR);

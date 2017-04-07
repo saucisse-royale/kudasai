@@ -19,6 +19,13 @@ namespace kds {
 		std::string engineName{"Kudasai"};
 	};
 
+	struct WindowConfig {
+		std::string title{""};
+		size_t width{1024};
+		size_t height{768};
+		bool resizable{true};
+	};
+
 	struct InstanceConfig {
 		VkInstanceCreateInfo makeConfig(VkApplicationInfo const* appInfo) noexcept;
 
@@ -63,7 +70,6 @@ namespace kds {
 		// Queue type array which defines what kind of queues will be created, and in which quantity
 		// NB: one queue CANNOT have two different queue type flags at the same time
 		std::vector<std::pair<DeviceQueueType, size_t>> queueTypes{{GRAPHICS, 1}};
-		//std::unordered_map<DeviceQueueType, size_t> queueTypes{{GRAPHICS, 1}}; test
 	};
 
 	struct DeviceConfig {
@@ -77,6 +83,7 @@ namespace kds {
 
 	struct ContextConfig {
 		ApplicationConfig applicationConfig{};
+		WindowConfig windowConfig{};
 		InstanceConfig instanceConfig{};
 		DebugConfig debugConfig{};
 		DeviceQueueConfig deviceQueueConfig{};

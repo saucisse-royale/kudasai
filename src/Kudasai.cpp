@@ -1,20 +1,20 @@
 #include "Kudasai.hpp"
 
 
-void initMap() {
-
+void Kudasai::initMap() {
+	engine.init();
 }
 
-void initUi() {
+void Kudasai::initUi() {
 	window.init(render);
 }
 
-void init() {
+void Kudasai::init() {
 	initMap();
 	initUi();
 }
 
-void loop() {
+void Kudasai::loop() {
 	time_t lastFrame = getNanos();
 	accumulator = 0;
 	while (!closeRequested) {
@@ -31,27 +31,26 @@ void loop() {
 	}
 }
 
-void render(const Drawer& drawer) {
-	// TODO, use alpha for interpolation
+void Kudasai::render(const Drawer& drawer) {
+	engine.render(drawer, alpha);
 }
 
-void exit() {
+void Kudasai::exit() {
 	window.exit();
 }
 
-
-void run() {
+void Kudasai::run() {
 	init();
 	loop();
 	exit();
 }
 
-
-int main() {
-	run();
-	return EXIT_SUCCESS;
+time_t Kudasai::getNanos() {
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start).count();
 }
 
-time_t getNanos() {
-	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start).count();
+int main() {
+	Kudasai kudasai{};
+	kudasai.run();
+	return EXIT_SUCCESS;
 }

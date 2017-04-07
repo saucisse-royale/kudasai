@@ -19,9 +19,9 @@ namespace kds {
 		instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		instanceInfo.pApplicationInfo = appInfo;
 		instanceInfo.enabledExtensionCount = extensionNames.size();
-		instanceInfo.ppEnabledExtensionNames = reinterpret_cast<char const* const*>(extensionNames.data());
+		instanceInfo.ppEnabledExtensionNames = extensionNames.data();
 		instanceInfo.enabledLayerCount = layerNames.size();
-		instanceInfo.ppEnabledLayerNames = reinterpret_cast<char const* const*>(layerNames.data());
+		instanceInfo.ppEnabledLayerNames = layerNames.data();
 
 		return instanceInfo;
 	}
@@ -117,7 +117,7 @@ namespace kds {
 		deviceInfo.queueCreateInfoCount = deviceQueueInfos.size();
 		deviceInfo.pQueueCreateInfos = deviceQueueInfos.data();
 		deviceInfo.enabledExtensionCount = extensions.size();
-		deviceInfo.ppEnabledExtensionNames = reinterpret_cast<char const* const*>(extensions.data());
+		deviceInfo.ppEnabledExtensionNames = extensions.data();
 		return deviceInfo;
 	}
 } // namespace kds

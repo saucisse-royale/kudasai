@@ -5,16 +5,21 @@
 #include "VulkanConfig.hpp"
 #include "RAII.hpp"
 
-namespace kds {
+#include <GLFW/glfw3.h>
 
+
+#include <memory>
+
+
+namespace kds {
 	class VulkanContext {
 	public:
-		VulkanContext(ContextConfig contextConfig) noexcept;
+		void create(ContextConfig contextConfig, GLFWwindow* window) noexcept;
 
 	private:
 		void _loadLayers() noexcept;
 		void _loadExtensions() noexcept;
-
+		void _initSurface(GLFWwindow* window) noexcept;
 		void _initInstance() noexcept;
 		void _queryPhysicalDevices() noexcept;
 		void _initDevice() noexcept;
@@ -27,6 +32,8 @@ namespace kds {
 		ContextConfig _contextConfig;
 		RAII<VkInstance> _instance{vkDestroyInstance, _instance, nullptr};
 		RAII<VkDevice> _device{vkDestroyDevice, _device, nullptr};
+
+		RAII<VkSurfaceKHR> _surface{vkDestroySurfaceKHR, _instance, _surface, nullptr};
 
 		RAII<VkDebugReportCallbackEXT> _debugReportCallback{vkDestroyDebugReportCallbackEXT, _instance, _debugReportCallback, nullptr};
 

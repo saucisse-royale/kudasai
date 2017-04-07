@@ -1,36 +1,49 @@
-#pragma once
+#ifndef WINDOW_HPP
+#define WINDOW_HPP
 
-#include "VulkanContext.hpp"
 #include "RAII.hpp"
 #include "InputStateManager.hpp"
+#include "VulkanConfig.hpp"
 #include <functional>
+#include <GLFW/glfw3.h>
+#include <vector>
+#include "VulkanContext.hpp"
 
 
 
-class Drawer {
-public:
-	virtual void drawRectangle(double x, double y, double width, double height) = 0;
-	virtual void drawOval(double x, double y, double width, double height) = 0;
-	virtual void drawCircle(double x, double y, double radius) {
-		drawOval(x, y, radius, radius);
-	}
-	virtual ~Drawer() {}
-};
+namespace kds {
 
-class Window : Drawer
-{
-public:
-	Window();
-	~Window();
-	void init(const std::function<void(const Drawer&)>& renderCallback);
-	std::vector<InputStateManager> input();
-	void render();
-	void exit();
+	class Drawer {
+	public:
+		virtual void drawRectangle(double x, double y, double width, double height) = 0;
+		virtual void drawOval(double x, double y, double width, double height) = 0;
+		virtual void drawCircle(double x, double y, double radius) {
+			drawOval(x, y, radius, radius);
+		}
+		virtual ~Drawer() {}
+	};
 
-private:
-	std::function<void(const Drawer&)> renderCallback;
-	std::vector<InputStateManager> inputs{};
-	virtual void drawRectangle(double x, double y, double width, double height) override;
-	virtual void drawOval(double x, double y, double width, double height) override;
-};
+	class Window : Drawer
+	{
+	public:
+		explicit Window(ContextConfig contextConfig);
+		~Window();
+		void init(WindowConfig const& windowConfig, const std::function<void(const Drawer&)>& renderCallback);
+		std::vector<InputStateManager> input();
+		void render();
 
+		GLFWwindow* window;
+		static void resize_callback(GLFWwindow* window, int width, int height);
+
+	private:
+		VulkanContext _vulkanContext;
+
+		std::function<void(const Drawer&)> renderCallback;
+		std::vector<InputStateManager> inputs{};
+		virtual void drawRectangle(double x, double y, double width, double height) override;
+		virtual void drawOval(double x, double y, double width, double height) override;
+	};
+
+} // namespace kds
+
+#endif

@@ -9,15 +9,17 @@
 #include <algorithm>
 #include <cstring>
 
+#include "Window.hpp"
+
 namespace kds {
 
-	VulkanContext::VulkanContext(ContextConfig contextConfig) noexcept :
-		_contextConfig{std::move(contextConfig)}
-	{
+	void VulkanContext::create(ContextConfig contextConfig, GLFWwindow* window) noexcept {
+		_contextConfig = std::move(contextConfig);
 		loader::init(_vulkanLibrary);
 		_loadLayers();
 		_loadExtensions();
 		_initInstance();
+		_initSurface(window);
 		_queryPhysicalDevices();
 		_initDevice();
 	}
@@ -83,6 +85,16 @@ namespace kds {
 		}
 	}
 
+	void VulkanContext::_initSurface(GLFWwindow* window) noexcept {
+		if (window == nullptr) {
+			std::cerr << "KDS FATAL: NULL window passed to vulkan context\n";
+			exit(1);
+		}
+
+		auto result = glfwCreateWindowSurface(_instance, window, nullptr, _surface.reset());
+		KDS_CHECK_RESULT(result, "Failed to create a window surface.\n");
+	}
+
 	void VulkanContext::_initInstance() noexcept {
 		VkApplicationInfo appInfo{ _contextConfig.applicationConfig.makeConfig() };
 		VkInstanceCreateInfo instanceInfo{ _contextConfig.instanceConfig.makeConfig(&appInfo) };
@@ -91,14 +103,13 @@ namespace kds {
 		KDS_CHECK_RESULT(result, "Failed to create a VkInstance");
 
 		loader::loadInstanceLevelFunctions(_vulkanLibrary, _instance);
-		//_instance.setDeleter(vkDestroyInstance, _instance, nullptr); VÂO
 
 		if (!_contextConfig.debugConfig.enabled) {
 			return;
 		}
 
 		// The following code is only related to debugging
-		loader::loadInstanceLevelExtensionFunctions(_vulkanLibrary, _instance);
+		loader::loadInstanceLevelDebugFunctions(_vulkanLibrary, _instance);
 
 		VkDebugReportCallbackCreateInfoEXT debugReportCallbackInfo{ _contextConfig.debugConfig.makeConfig() };
 		result = vkCreateDebugReportCallbackEXT(_instance, &debugReportCallbackInfo, nullptr, _debugReportCallback.reset());
@@ -149,7 +160,7 @@ namespace kds {
 		const char* msg,
 		void* userData)
 	{
-		std::cerr << layerPrefix << ": " << msg << '\n';
+		std::clog << layerPrefix << ": " << msg << '\n';
 		return true;
 	}
 
