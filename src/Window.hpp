@@ -1,8 +1,7 @@
-#ifndef WINDOW_HPP
-#define WINDOW_HPP
+#pragma once
 
 #include "RAII.hpp"
-#include "InputStateManager.hpp"
+#include "Input.hpp"
 #include "VulkanConfig.hpp"
 #include <functional>
 #include <GLFW/glfw3.h>
@@ -26,10 +25,12 @@ namespace kds {
 	class Window : Drawer
 	{
 	public:
-		explicit Window(ContextConfig contextConfig);
+		Window();
 		~Window();
+		void init(ContextConfig const& contextConfig, const std::function<void(const Drawer&)>& renderCallback);
 		void init(WindowConfig const& windowConfig, const std::function<void(const Drawer&)>& renderCallback);
-		std::vector<InputStateManager> input();
+		void close();
+		std::vector<Input> input();
 		void render();
 
 		GLFWwindow* window;
@@ -39,11 +40,9 @@ namespace kds {
 		VulkanContext _vulkanContext;
 
 		std::function<void(const Drawer&)> renderCallback;
-		std::vector<InputStateManager> inputs{};
+		std::vector<Input> inputs{};
 		virtual void drawRectangle(double x, double y, double width, double height) override;
 		virtual void drawOval(double x, double y, double width, double height) override;
 	};
 
 } // namespace kds
-
-#endif

@@ -19,7 +19,11 @@ KDS_DECL(vkGetDeviceProcAddr);
 KDS_DECL(vkDestroyInstance);
 KDS_DECL(vkCreateDebugReportCallbackEXT);
 KDS_DECL(vkDestroyDebugReportCallbackEXT);
+#ifdef KDS_OS_LINUX
 KDS_DECL(vkCreateXcbSurfaceKHR);
+#elif defined(KDS_OS_WINDOWS)
+KDS_DECL(vkCreateWin32SurfaceKHR);
+#endif
 
 // Device level functions
 KDS_DECL(vkDestroyDevice);
@@ -191,7 +195,11 @@ bool kds::loader::loadInstanceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance
 	KDS_LOAD_INSTANCE_LEVEL(vkCreateDevice);
 	KDS_LOAD_INSTANCE_LEVEL(vkGetDeviceProcAddr);
 	KDS_LOAD_INSTANCE_LEVEL(vkDestroyInstance);
+#ifdef KDS_OS_LINUX
 	KDS_LOAD_INSTANCE_LEVEL(vkCreateXcbSurfaceKHR);
+#elif defined(KDS_OS_WINDOWS)
+	KDS_LOAD_INSTANCE_LEVEL(vkCreateWin32SurfaceKHR);
+#endif
 	KDS_LOAD_INSTANCE_LEVEL(vkDestroySurfaceKHR);
 	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceSurfaceSupportKHR);
 	KDS_LOAD_INSTANCE_LEVEL(vkGetPhysicalDeviceSurfacePresentModesKHR);

@@ -14,6 +14,7 @@
 	#include <dlfcn.h>
 #elif defined(__MINGW32__) || defined(_WIN32)
 	#define KDS_OS_WINDOWS
+    #define VK_USE_PLATFORM_WIN32_KHR
 	#define VULKAN_LIBRARY_TYPE HMODULE
 	#include <Windows.h>
 #endif
@@ -229,9 +230,11 @@ KDS_DECL_EXTERN(vkCreateSwapchainKHR);
 KDS_DECL_EXTERN(vkDestroySwapchainKHR);
 KDS_DECL_EXTERN(vkDestroySurfaceKHR);
 
-// test
+#ifdef KDS_OS_LINUX
 KDS_DECL_EXTERN(vkCreateXcbSurfaceKHR);
-
+#elif defined(KDS_OS_WINDOWS)
+KDS_DECL_EXTERN(vkCreateWin32SurfaceKHR);
+#endif
 
 #ifdef __cplusplus
 }

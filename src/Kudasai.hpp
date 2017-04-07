@@ -1,34 +1,37 @@
 #pragma once
 
 #include <chrono>
+#include <functional>
 #include "Window.hpp"
 #include "Engine.hpp"
-#include "InputStateManager.hpp"
+#include "Input.hpp"
 
-typedef std::chrono::nanoseconds::rep time_t;
+namespace kds {
 
-class Kudasai {
-public:
-	void run();
-private:
-	const time_t TICK_TIME = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{ 10 }).count();
+	typedef std::chrono::nanoseconds::rep time_t;
 
-	std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
-	Window window{};
-	Engine engine{};
-	InputStateManager inputStateManager{};
-	bool closeRequested = false;
-	time_t accumulator;
-	float alpha; // for #render(), updated each loop
+	class Kudasai {
+	public:
+		void run();
+	private:
+		const time_t TICK_TIME = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{ 10 }).count();
 
-	void initMap();
-	void initUi();
-	void init();
-	void loop();
-	void render(const Drawer& drawer);
-	void exit();
+		std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+		Window window{};
+		Engine engine{};
 
-	time_t getNanos();
-};
+		bool closeRequested = false;
+		time_t accumulator;
+		float alpha; // for #render(), updated each loop
 
-int main();
+		void initMap();
+		void initUi();
+		void init();
+		void loop();
+		void render(const Drawer& drawer);
+		void close();
+
+		time_t getNanos();
+	};
+
+}

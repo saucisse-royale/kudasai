@@ -1,12 +1,14 @@
 #include "Kudasai.hpp"
 
+namespace kds {
 
 void Kudasai::initMap() {
 	engine.init();
 }
 
 void Kudasai::initUi() {
-	window.init(render);
+	WindowConfig config{};
+	window.init(config, std::bind(&Kudasai::render, this, std::placeholders::_1));
 }
 
 void Kudasai::init() {
@@ -35,22 +37,24 @@ void Kudasai::render(const Drawer& drawer) {
 	engine.render(drawer, alpha);
 }
 
-void Kudasai::exit() {
-	window.exit();
+void Kudasai::close() {
+	window.close();
 }
 
 void Kudasai::run() {
 	init();
 	loop();
-	exit();
+	close();
 }
 
 time_t Kudasai::getNanos() {
 	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start).count();
 }
 
+}
+
 int main() {
-	Kudasai kudasai{};
+	kds::Kudasai kudasai{};
 	kudasai.run();
 	return EXIT_SUCCESS;
 }
