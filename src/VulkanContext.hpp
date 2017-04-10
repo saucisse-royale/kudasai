@@ -1,9 +1,9 @@
-#ifndef VULKAN_CONTEXT_HPP
-#define VULKAN_CONTEXT_HPP
+#pragma once
 
 #include "VulkanLoader.hpp"
 #include "VulkanConfig.hpp"
 #include "RAII.hpp"
+#include "VulkanSwapchain.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -16,7 +16,6 @@ namespace kds {
 	public:
 		void create(ContextConfig contextConfig, GLFWwindow* window) noexcept;
 
-	private:
 		void _loadLayers() noexcept;
 		void _loadExtensions() noexcept;
 		void _initSurface(GLFWwindow* window) noexcept;
@@ -31,13 +30,20 @@ namespace kds {
 
 		ContextConfig _contextConfig;
 		RAII<VkInstance> _instance{vkDestroyInstance, _instance, nullptr};
+
 		RAII<VkDevice> _device{vkDestroyDevice, _device, nullptr};
+		std::vector<VkQueue> _graphicsQueues{};
+		std::vector<VkQueue> _computeQueues{};
+		std::vector<VkQueue> _transferQueues{};
+		std::vector<VkQueue> _sparseBindingQueues{};
 
 		RAII<VkSurfaceKHR> _surface{vkDestroySurfaceKHR, _instance, _surface, nullptr};
 
+		VulkanSwapchain _vulkanSwapchain{this};
+
+
 		RAII<VkDebugReportCallbackEXT> _debugReportCallback{vkDestroyDebugReportCallbackEXT, _instance, _debugReportCallback, nullptr};
 
-	public:
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugReportFlagsEXT flags,
 			VkDebugReportObjectTypeEXT objType,
@@ -51,5 +57,3 @@ namespace kds {
 	}; // class VulkanContext
 
 } // namespace kds
-
-#endif // VulkanContext.hpp

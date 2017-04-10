@@ -22,6 +22,7 @@ namespace kds {
 		_initSurface(window);
 		_queryPhysicalDevices();
 		_initDevice();
+		_vulkanSwapchain.create();
 	}
 
 	void VulkanContext::_loadLayers() noexcept {
@@ -141,13 +142,48 @@ namespace kds {
 	}
 
 	void VulkanContext::_initDevice() noexcept {
-		std::vector<VkDeviceQueueCreateInfo> deviceQueueInfos = _contextConfig.deviceQueueConfig.makeConfig(_physicalDevice);
+		auto& deviceQueueConfig = _contextConfig.deviceQueueConfig;
+		std::vector<VkDeviceQueueCreateInfo> deviceQueueInfos = deviceQueueConfig.makeConfig(_physicalDevice);
 		VkDeviceCreateInfo deviceInfo{ _contextConfig.deviceConfig.makeConfig(_physicalDevice, deviceQueueInfos) };
 
 		auto result = vkCreateDevice(_physicalDevice, &deviceInfo, nullptr, _device.reset());
 		KDS_CHECK_RESULT(result, "Failed to create a logical device\n");
-
 		loader::loadDeviceLevelFunctions(_vulkanLibrary, _device);
+
+		// Resize all the queues
+		_graphicsQueues.resize(deviceQueueConfig.graphicsQueueInfos.count);
+		_computeQueues.resize(deviceQueueConfig.computeQueueInfos.count);
+		_transferQueues.resize(deviceQueueConfig.transferQueueInfos.count);
+		_sparseBindingQueues.resize(deviceQueueConfig.sparseBindingQueueInfos.count);
+
+
+		// Retrieve every created queue from the created device
+		for (size_t i{}; i < deviceQueueConfig.graphicsQueueInfos.count; ++i) {
+			vkGetDeviceQueue(_device, deviceQueueConfig.graphicsQueueInfos.index, i, &_graphicsQueues[i]);
+		}
+
+		for (size_t i{}; i < deviceQueueConfig.computeQueueInfos.count; ++i) {
+			vkGetDeviceQueue(_device, deviceQueueConfig.computeQueueInfos.index, i, &_computeQueues[i]);
+		}
+
+		for (size_t i{}; i < deviceQueueConfig.transferQueueInfos.count; ++i) {
+			vkGetDeviceQueue(_device, deviceQueueConfig.transferQueueInfos.index, i, &_transferQueues[i]);
+		}
+
+		for (size_t i{}; i < deviceQueueConfig.sparseBindingQueueInfos.count; ++i) {
+			vkGetDeviceQueue(_device, deviceQueueConfig.sparseBindingQueueInfos.index, i, &_sparseBindingQueues[i]);
+		}
+
+		// Check presenting support for the created queues
+		VkBool32 surfaceSupported{};
+		result = vkGetPhysicalDeviceSurfaceSupportKHR(_physicalDevice, 0, _surface, &surfaceSupported);
+		KDS_CHECK_RESULT(result, "Failed to get physical device surface support\n");
+
+		if (surfaceSupported != VK_TRUE) {
+			std::cerr << "KDS FATAL: created surface that does not support graphics queue.\n";
+			exit(1);
+		}
+
 	}
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanContext::debugCallback(

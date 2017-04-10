@@ -1,5 +1,4 @@
-#ifndef RAII_HPP
-#define RAII_HPP
+#pragma once
 
 #include <functional>
 #include <iostream>
@@ -84,5 +83,3 @@ namespace kds {
 		std::function<void(void)> _deleter{[]{}};
 	}; // class RAII
 } // namespace kds
-
-#endif // RAII.hpp

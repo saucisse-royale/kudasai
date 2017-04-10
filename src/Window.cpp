@@ -25,6 +25,8 @@ namespace kds {
 		ContextConfig contextConfig{};
 		contextConfig.debugConfig.enabled = true;
 		contextConfig.debugConfig.severity = DebugConfig::FULL;
+		contextConfig.deviceQueueConfig.graphicsQueueInfos.count = 2;
+		//contextConfig.deviceQueueConfig.computeQueueInfos.count = 15;
 		contextConfig.windowConfig = windowConfig;
 		init(contextConfig, renderCallback);
 	}
@@ -38,7 +40,7 @@ namespace kds {
 			std::cerr << "KDS FATAL: failed to init GLFW\n";
 			exit(1);
 		}
-			
+
 		// Disable openGL
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, contextConfig.windowConfig.resizable ? GLFW_TRUE : GLFW_FALSE);

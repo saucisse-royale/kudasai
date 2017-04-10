@@ -1,3 +1,5 @@
+#include <GLFW/glfw3.h>
+
 #include "Kudasai.hpp"
 
 namespace kds {
@@ -17,6 +19,7 @@ void Kudasai::init() {
 }
 
 void Kudasai::loop() {
+	glfwPollEvents();
 	time_t lastFrame = getNanos();
 	accumulator = 0;
 	while (!closeRequested) {
@@ -43,7 +46,7 @@ void Kudasai::close() {
 
 void Kudasai::run() {
 	init();
-	loop();
+	//loop();
 	close();
 }
 

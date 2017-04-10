@@ -1,5 +1,4 @@
-#ifndef VULKAN_LOADER_HPP
-#define VULKAN_LOADER_HPP
+#pragma once
 
 /// Vulkan loader
 ///
@@ -239,5 +238,3 @@ KDS_DECL_EXTERN(vkCreateWin32SurfaceKHR);
 #ifdef __cplusplus
 }
 #endif
-
-#endif // VulkanLoader.hpp

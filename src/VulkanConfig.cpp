@@ -59,40 +59,43 @@ namespace kds {
 		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertiesCount, queueFamilyProperties.data());
 
 		// We need to create a CreateInfo Structure for each requested queue family
-		queuePriorities.resize(queueTypes.size());
-		for (size_t&& i{}; i < queueTypes.size(); ++i) {
+		for (size_t i{}; i < queueFamiliesCount; ++i) { // queueFamiliesCount == 4
+			QueueInfos* currentQueueInfo{nullptr}; // We can't use a reference here because the init value is determined in the following switch statement
+
+			switch (i) {
+			case 0:
+				currentQueueInfo = &graphicsQueueInfos;
+
+				break;
+			case 1:
+				currentQueueInfo = &computeQueueInfos;
+				break;
+			case 2:
+				currentQueueInfo = &transferQueueInfos;
+				break;
+			case 3:
+				currentQueueInfo = &sparseBindingQueueInfos;
+				break;
+			}
+
+			if (currentQueueInfo->count == 0) {
+				continue;
+			}
+
+			currentQueueInfo->priorities.resize(currentQueueInfo->count, 1.0f);
+
 			VkDeviceQueueCreateInfo deviceQueueInfo{};
 			deviceQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			deviceQueueInfo.queueCount = queueTypes[i].second; // queueType : first is enum deviceQueueType (eg GRAPHICS), second is size_t (the amount of queues of this type)
-			queuePriorities[i].resize(deviceQueueInfo.queueCount, 1.0f);
-			deviceQueueInfo.pQueuePriorities = queuePriorities[i].data();
+			deviceQueueInfo.queueCount = currentQueueInfo->count;
+			deviceQueueInfo.pQueuePriorities = currentQueueInfo->priorities.data();
 
-			// Parse the current queue family
-			uint32_t currentQueueFamily;
-			switch (queueTypes[i].first) {
-				case GRAPHICS:
-					currentQueueFamily = VK_QUEUE_GRAPHICS_BIT;
-					break;
-
-				case COMPUTE:
-					currentQueueFamily = VK_QUEUE_COMPUTE_BIT;
-					break;
-
-				case TRANSFER:
-					currentQueueFamily = VK_QUEUE_TRANSFER_BIT;
-					break;
-
-				case SPARSE_BINDING:
-					currentQueueFamily = VK_QUEUE_SPARSE_BINDING_BIT;
-					break;
-
-				default:
-					break;
-			}
+			// Find the current queue family
+			// Small trick to match the increment index to queue family flag, which is 0x1, 0x2, 0x4, 0x8 to avoid massive switch statements
+			auto currentQueueFamily{currentQueueInfo->family};
 
 			// custom search algorithm, only used once
 			// it finds the index in the array of available queue families that matches the flag requested by the queue family we want to create
-			uint32_t queueFamilyIndex = [&]{
+			currentQueueInfo->index = [&]{
 				for (size_t&& j{}; j < queueFamilyPropertiesCount; ++j) {
 					if ((queueFamilyProperties[j].queueCount > 0) && (queueFamilyProperties[j].queueFlags & currentQueueFamily)) {
 						return j;
@@ -104,7 +107,7 @@ namespace kds {
 				exit(1);
 			}();
 
-			deviceQueueInfo.queueFamilyIndex = queueFamilyIndex;
+			deviceQueueInfo.queueFamilyIndex = currentQueueInfo->index;
 
 			deviceQueueInfos.push_back(std::move(deviceQueueInfo));
 		}

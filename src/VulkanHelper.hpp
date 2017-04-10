@@ -1,5 +1,4 @@
-#ifndef VULKAN_HELPER_HPP
-#define VULKAN_HELPER_HPP
+#pragma once
 
 #include <iostream>
 
@@ -12,5 +11,3 @@
 		std::cerr << "KDS FATAL: " << msg << " Exit code: " << result <<'\n';\
 		exit(result);\
 	}
-
-#endif // VulkanHelper.hpp

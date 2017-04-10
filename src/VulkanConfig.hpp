@@ -1,5 +1,4 @@
-#ifndef VULKAN_CONFIG_HPP
-#define VULKAN_CONFIG_HPP
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -57,19 +56,32 @@ namespace kds {
 		// Returns an array of VkDeviceQueueCreateInfo since multiple queues can be created with the device
 		std::vector<VkDeviceQueueCreateInfo> makeConfig(VkPhysicalDevice physicalDevice) noexcept;
 
-		// Contains all the queue priorities for each queue family, 1.0f by default so that every queue have the same priority level
-		std::vector<std::vector<float>> queuePriorities{};
-
 		enum DeviceQueueType {
-			GRAPHICS,
-			COMPUTE,
-			TRANSFER,
-			SPARSE_BINDING
+			GRAPHICS = 0,
+			COMPUTE = 1,
+			TRANSFER = 2,
+			SPARSE_BINDING = 3
 		};
 
-		// Queue type array which defines what kind of queues will be created, and in which quantity
-		// NB: one queue CANNOT have two different queue type flags at the same time
-		std::vector<std::pair<DeviceQueueType, size_t>> queueTypes{{GRAPHICS, 1}};
+		struct QueueInfos {
+			uint32_t count{};
+			uint32_t index{};
+			std::vector<float> priorities{};
+			VkQueueFlagBits family;
+		};
+
+		QueueInfos graphicsQueueInfos{
+			.count = 1,
+			.priorities = {1.0f},
+			.family = VK_QUEUE_GRAPHICS_BIT
+		};
+
+		QueueInfos computeQueueInfos{.family = VK_QUEUE_COMPUTE_BIT};
+		QueueInfos transferQueueInfos{.family = VK_QUEUE_TRANSFER_BIT};
+		QueueInfos sparseBindingQueueInfos{.family = VK_QUEUE_SPARSE_BINDING_BIT};
+
+	private:
+		uint32_t queueFamiliesCount{4}; // !! DON'T CHANGE THIS
 	};
 
 	struct DeviceConfig {
@@ -81,6 +93,7 @@ namespace kds {
 		// NB: devices layers are deprecated and should not be set
 	};
 
+
 	struct ContextConfig {
 		ApplicationConfig applicationConfig{};
 		WindowConfig windowConfig{};
@@ -90,5 +103,3 @@ namespace kds {
 		DeviceConfig deviceConfig{};
 	};
 } // namespace kds
-
-#endif // VulkanConfig.hpp
