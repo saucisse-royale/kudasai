@@ -22,7 +22,11 @@ namespace kds {
 		_initSurface(window);
 		_queryPhysicalDevices();
 		_initDevice();
-		_vulkanSwapchain.create();
+		_vulkanSwapchain.init();
+
+		/*for (size_t i{}; i < 100; ++i) {
+			_vulkanSwapchain.recreate();
+		}*/
 	}
 
 	void VulkanContext::_loadLayers() noexcept {

@@ -25,7 +25,7 @@ namespace kds {
 		ContextConfig contextConfig{};
 		contextConfig.debugConfig.enabled = true;
 		contextConfig.debugConfig.severity = DebugConfig::FULL;
-		contextConfig.deviceQueueConfig.graphicsQueueInfos.count = 2;
+		contextConfig.deviceQueueConfig.graphicsQueueInfos.count = 1;
 		//contextConfig.deviceQueueConfig.computeQueueInfos.count = 15;
 		contextConfig.windowConfig = windowConfig;
 		init(contextConfig, renderCallback);

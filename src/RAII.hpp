@@ -36,6 +36,8 @@ namespace kds {
 		{}
 
 		RAII() = default;
+		RAII(RAII&&) = default;
+
 
 		~RAII() noexcept {
 			_clean();
@@ -44,6 +46,14 @@ namespace kds {
 		Type* reset() noexcept {
 			_clean();
 			return &_obj;
+		}
+
+		template<typename Fun, typename... Args>
+		RAII<Type>& reset(Type obj, Fun&& fun, Args&&... args) noexcept {
+			_clean();
+			_obj = obj;
+			_deleter = [&]{ std::forward<Fun>(fun)(std::forward<Args>(args)...); };
+			return *this;
 		}
 
 		template<typename Fun, typename... Args>

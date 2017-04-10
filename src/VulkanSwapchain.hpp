@@ -11,7 +11,9 @@ namespace kds {
 	class VulkanSwapchain {
 	public:
 		explicit VulkanSwapchain(VulkanContext* VulkanContext) noexcept;
+		void init() noexcept;
 		void create() noexcept;
+		void recreate() noexcept;
 		void queryCapabilities() noexcept;
 
 		void setImageCount() noexcept;
@@ -21,6 +23,9 @@ namespace kds {
 		VkPresentModeKHR pickPresentMode() noexcept;
 
 		void setSwapchainExtent(size_t width, size_t height) noexcept;
+
+		void retrieveImages() noexcept;
+		void createImageViews() noexcept;
 
 	private:
 		VulkanContext* _vulkanContext{};
@@ -33,8 +38,8 @@ namespace kds {
 		VkExtent2D _swapchainExtent{};
 
 		RAII<VkSwapchainKHR> _swapchain;
-		RAII<VkSwapchainKHR> _oldSwapchain;
-
+		std::vector<VkImage> _swapchainImages{};
+		std::vector<RAII<VkImageView>> _swapchainImageViews{};
 	};
 
 } // namespace kds

@@ -8,9 +8,17 @@ namespace kds {
 
 	VulkanSwapchain::VulkanSwapchain(VulkanContext* vulkanContext) noexcept :
 		_vulkanContext{vulkanContext},
-		_swapchain{vkDestroySwapchainKHR, _vulkanContext->_device, _swapchain, nullptr},
-		_oldSwapchain{vkDestroySwapchainKHR, _vulkanContext->_device, _oldSwapchain, nullptr}
+		_swapchain{vkDestroySwapchainKHR, _vulkanContext->_device, _swapchain, nullptr}
 	{}
+
+	void VulkanSwapchain::init() noexcept {
+		queryCapabilities();
+		setImageCount();
+		setSwapchainExtent(_vulkanContext->_contextConfig.windowConfig.width, _vulkanContext->_contextConfig.windowConfig.height);
+		create();
+		retrieveImages();
+		createImageViews();
+	}
 
 	void VulkanSwapchain::queryCapabilities() noexcept {
 		auto& physicalDevice = _vulkanContext->_physicalDevice;
@@ -122,12 +130,44 @@ namespace kds {
 		_swapchainExtent.height = height;
 	}
 
+	void VulkanSwapchain::retrieveImages() noexcept {
+		auto result = vkGetSwapchainImagesKHR(_vulkanContext->_device, _swapchain, &_imageCount, nullptr);
+		KDS_CHECK_RESULT(result, "Failed to get swapchain images\n");
+
+		_swapchainImages.resize(_imageCount);
+
+		result = vkGetSwapchainImagesKHR(_vulkanContext->_device, _swapchain, &_imageCount, _swapchainImages.data());
+		KDS_CHECK_RESULT(result, "Failed to get swapchain images\n");
+	}
+
+	void VulkanSwapchain::createImageViews() noexcept {
+		_swapchainImageViews.resize(_imageCount);
+
+		for (size_t i{}; i < _imageCount; ++i) {
+			_swapchainImageViews[i].setDeleter(vkDestroyImageView, _vulkanContext->_device, _swapchainImageViews[i], nullptr);
+
+			VkImageViewCreateInfo imageViewInfo{};
+			imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			imageViewInfo.image = _swapchainImages[i];
+			imageViewInfo.format = pickSurfaceFormat().format;
+			imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			imageViewInfo.subresourceRange.layerCount = 1;
+			imageViewInfo.subresourceRange.baseArrayLayer = 0;
+			imageViewInfo.subresourceRange.levelCount = 1;
+			imageViewInfo.subresourceRange.baseMipLevel = 0;
+
+			auto result = vkCreateImageView(_vulkanContext->_device, &imageViewInfo, nullptr, _swapchainImageViews[i].reset());
+			KDS_CHECK_RESULT(result, "Failed to create an image view.");
+		}
+
+	}
+
 	void VulkanSwapchain::create() noexcept {
-		queryCapabilities();
-		setImageCount();
-		setSwapchainExtent(_vulkanContext->_contextConfig.windowConfig.width, _vulkanContext->_contextConfig.windowConfig.height);
-
-
 		auto& surface = _vulkanContext->_surface;
 
 		auto& deviceQueueConfig = _vulkanContext->_contextConfig.deviceQueueConfig;
@@ -162,7 +202,6 @@ namespace kds {
 		swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		swapchainInfo.presentMode = pickPresentMode();
 		swapchainInfo.clipped = VK_TRUE;
-		swapchainInfo.oldSwapchain = _oldSwapchain;
 		swapchainInfo.preTransform = _capabilities.currentTransform;
 
 		if (indices.size() == 1) {
@@ -172,10 +211,18 @@ namespace kds {
 			swapchainInfo.queueFamilyIndexCount = indices.size();
 			swapchainInfo.pQueueFamilyIndices = indices.data();
 		}
-		
-		_oldSwapchain = _swapchain;
-		auto result = vkCreateSwapchainKHR(_vulkanContext->_device, &swapchainInfo, nullptr, _swapchain.reset());
+
+		swapchainInfo.oldSwapchain = _swapchain;
+		VkSwapchainKHR newSwapchain{};
+		auto result = vkCreateSwapchainKHR(_vulkanContext->_device, &swapchainInfo, nullptr, &newSwapchain);
 		KDS_CHECK_RESULT(result, "Failed to create a swapchain.");
+
+		_swapchain = newSwapchain;
+	}
+
+	void VulkanSwapchain::recreate() noexcept {
+		setSwapchainExtent(_vulkanContext->_contextConfig.windowConfig.width, _vulkanContext->_contextConfig.windowConfig.height);
+		create();
 	}
 
 } // namespace kds

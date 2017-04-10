@@ -14,7 +14,7 @@ OBJ = $(SRC:.c = .o)
 
 EXEC = kudasai
 
-debug: CPPFLAGS += -Wall -Wextra -pedantic -g -O2
+debug: CPPFLAGS += -Wall -Wextra -pedantic -g -O3
 debug : all
 
 release: CPPFLAGS += -O2
