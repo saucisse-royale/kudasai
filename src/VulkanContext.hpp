@@ -4,6 +4,7 @@
 #include "VulkanConfig.hpp"
 #include "RAII.hpp"
 #include "VulkanSwapchain.hpp"
+#include "VulkanGraphicsPipeline.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -22,6 +23,7 @@ namespace kds {
 		void _initInstance() noexcept;
 		void _queryPhysicalDevices() noexcept;
 		void _initDevice() noexcept;
+		void _initFramebuffer() noexcept;
 
 		RAII<VULKAN_LIBRARY_TYPE> _vulkanLibrary{loader::terminate, _vulkanLibrary};
 
@@ -40,7 +42,9 @@ namespace kds {
 		RAII<VkSurfaceKHR> _surface{vkDestroySurfaceKHR, _instance, _surface, nullptr};
 
 		VulkanSwapchain _vulkanSwapchain{this};
+		RAII<VkFramebuffer> _framebuffer{vkDestroyFramebuffer, _device, _framebuffer, nullptr};
 
+		VulkanGraphicsPipeline _graphicsPipeline{this};
 
 		RAII<VkDebugReportCallbackEXT> _debugReportCallback{vkDestroyDebugReportCallbackEXT, _instance, _debugReportCallback, nullptr};
 

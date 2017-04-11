@@ -25,7 +25,7 @@ namespace kds {
 			float depthBiasConstantFactor{};
 			float depthBiasClamp{};
 			float depthBiasSlopeFactor{};
-			float lineWidth{};
+			float lineWidth{1.0f};
 
 		} rasterizerConfig;
 	};
@@ -43,6 +43,9 @@ namespace kds {
 
 		void createVertexShaderModule(std::string const& path) noexcept;
 		void createFragmentShaderModule(std::string const& path) noexcept;
+
+		RAII<VkPipelineLayout> createPipelineLayout() const noexcept;
+		RAII<VkRenderPass> createRenderPass() const noexcept;
 
 
 		// non owning pointer to the vulkan context

@@ -19,7 +19,7 @@ namespace kds {
 		void setImageCount() noexcept;
 		void setImageCount(uint32_t imageCount) noexcept;
 
-		VkSurfaceFormatKHR pickSurfaceFormat() noexcept;
+		void pickSurfaceFormat() noexcept;
 		VkPresentModeKHR pickPresentMode() noexcept;
 
 		void setSwapchainExtent(size_t width, size_t height) noexcept;
@@ -27,12 +27,13 @@ namespace kds {
 		void retrieveImages() noexcept;
 		void createImageViews() noexcept;
 
-	private:
 		VulkanContext* _vulkanContext{};
 
 		VkSurfaceCapabilitiesKHR _capabilities;
 		std::vector<VkSurfaceFormatKHR> _surfaceFormats;
 		std::vector<VkPresentModeKHR> _presentModes;
+
+		VkSurfaceFormatKHR _surfaceFormat;
 
 		uint32_t _imageCount{};
 		VkExtent2D _swapchainExtent{};

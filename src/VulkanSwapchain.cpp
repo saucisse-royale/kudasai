@@ -13,6 +13,7 @@ namespace kds {
 
 	void VulkanSwapchain::init() noexcept {
 		queryCapabilities();
+		pickSurfaceFormat();
 		setImageCount();
 		setSwapchainExtent(_vulkanContext->_contextConfig.windowConfig.width, _vulkanContext->_contextConfig.windowConfig.height);
 		create();
@@ -66,7 +67,7 @@ namespace kds {
 		_imageCount = imageCount;
 	}
 
-	VkSurfaceFormatKHR VulkanSwapchain::pickSurfaceFormat() noexcept {
+	void VulkanSwapchain::pickSurfaceFormat() noexcept {
 		if (_surfaceFormats.size() == 0) {
 			std::cerr << "KDS FATAL: No surface formats found, try to query swapchain capabilities first\n";
 			exit(1);
@@ -74,18 +75,20 @@ namespace kds {
 
 		// Formats may be undefined, default initialize it then
 		if (_surfaceFormats.size() == 1 && _surfaceFormats[0].format == VK_FORMAT_UNDEFINED) {
-			return {VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+			_surfaceFormat = {VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+			return;
 		}
 
 		// Currently seeking only for R8G8B8A8 color space
 		for (auto const& surfaceFormat : _surfaceFormats) {
 			if (surfaceFormat.format == VK_FORMAT_R8G8B8A8_UNORM) {
-				return surfaceFormat;
+				_surfaceFormat =  surfaceFormat;
+				return;
 			}
 		}
 
 		// Default initialization if the requested format is not found
-		return _surfaceFormats[0];
+		_surfaceFormat =  _surfaceFormats[0];
 	}
 
 	VkPresentModeKHR VulkanSwapchain::pickPresentMode() noexcept {
@@ -149,7 +152,7 @@ namespace kds {
 			VkImageViewCreateInfo imageViewInfo{};
 			imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			imageViewInfo.image = _swapchainImages[i];
-			imageViewInfo.format = pickSurfaceFormat().format;
+			imageViewInfo.format = _surfaceFormat.format;
 			imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 			imageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 			imageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -188,14 +191,13 @@ namespace kds {
 		}
 
 
+
 		VkSwapchainCreateInfoKHR swapchainInfo{};
 		swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchainInfo.surface = surface;
 		swapchainInfo.minImageCount = _capabilities.minImageCount;
-
-		auto surfaceFormat = pickSurfaceFormat();
-		swapchainInfo.imageFormat = surfaceFormat.format;
-		swapchainInfo.imageColorSpace = surfaceFormat.colorSpace;
+		swapchainInfo.imageFormat = _surfaceFormat.format;
+		swapchainInfo.imageColorSpace = _surfaceFormat.colorSpace;
 		swapchainInfo.imageExtent = _swapchainExtent;
 		swapchainInfo.imageArrayLayers = 1;
 		swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;

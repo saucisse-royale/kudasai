@@ -24,9 +24,16 @@ namespace kds {
 		_initDevice();
 		_vulkanSwapchain.init();
 
+		VulkanGraphicsPipelineConfig pipelineConfig{};
+		pipelineConfig.fragmentPath = "src/shaders/frag.spv";
+		pipelineConfig.vertexPath = "src/shaders/vert.spv";
+		_graphicsPipeline.create(pipelineConfig);
+
 		/*for (size_t i{}; i < 100; ++i) {
 			_vulkanSwapchain.recreate();
 		}*/
+
+		//_initFramebuffer();
 	}
 
 	void VulkanContext::_loadLayers() noexcept {
@@ -188,6 +195,12 @@ namespace kds {
 			exit(1);
 		}
 
+	}
+
+	void _initFramebuffer() noexcept {
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		return;
 	}
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanContext::debugCallback(
