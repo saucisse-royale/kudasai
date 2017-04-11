@@ -1,4 +1,5 @@
 CC = clang++ $(INCLUDES) $(STD)
+SHADERCC = ./bin/glslc
 STD = -std=c++1z
 CPPFLAGS =
 
@@ -10,6 +11,7 @@ LINKS = `pkg-config --libs glfw3` -lpthread -ldl -L ./include
 LD_LIBRARY_PATH= .
 
 SRC = $(wildcard */*.cpp) $(wildcard */*/*.cpp)
+SHADERSRC = $(wildcard src/shaders/*.frag) $(wildcard src/shaders/*.vert)
 OBJ = $(SRC:.c = .o)
 
 EXEC = kudasai
@@ -31,6 +33,11 @@ $(EXEC): $(OBJ)
 
 %.o: %.c
 	$(CC) $(STD) $(CFLAGS)  -c $< -o $@
+
+shaders:
+	rm -rf $(wildcard src/shaders/*.spv)
+	$(SHADERCC) -c $(SHADERSRC)
+	mv *.spv src/shaders
 
 clean:
 	rm -rf *.o $(EXEC)

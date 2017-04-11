@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
+#include <string>
 
 #include "VulkanLoader.hpp"
 
@@ -11,3 +13,9 @@
 		std::cerr << "KDS FATAL: " << msg << " Exit code: " << result <<'\n';\
 		exit(result);\
 	}
+
+namespace kds {
+namespace utils {
+	std::vector<char> read_file(std::string const& path) noexcept;
+} // namespace utils
+} // namespace kds

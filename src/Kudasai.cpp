@@ -59,5 +59,4 @@ time_t Kudasai::getNanos() {
 int main() {
 	kds::Kudasai kudasai{};
 	kudasai.run();
-	return EXIT_SUCCESS;
 }
