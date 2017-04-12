@@ -19,18 +19,18 @@ void Kudasai::init() {
 }
 
 void Kudasai::loop() {
-	glfwPollEvents();
 	time_t lastFrame = getNanos();
 	accumulator = 0;
-	while (!closeRequested) {
+	while (!glfwWindowShouldClose(window.window)) {
+		glfwPollEvents();
 		time_t newTime = getNanos();
 		time_t deltaTime = newTime - lastFrame;
 		lastFrame = newTime;
 		accumulator += deltaTime;
-		while (accumulator >= TICK_TIME) {
+		/*while (accumulator >= TICK_TIME) { /// OMG FIX THIS SA FAIT TOUT CRASHERéééé~Ao
 			engine.logic(window.input());
 			accumulator -= TICK_TIME;
-		}
+		}*/
 		alpha = (float) accumulator / TICK_TIME; // update alpha for #render()
 		window.render(); // calls render
 	}
@@ -46,7 +46,7 @@ void Kudasai::close() {
 
 void Kudasai::run() {
 	init();
-	//loop();
+	loop();
 	close();
 }
 

@@ -5,6 +5,7 @@
 #include "RAII.hpp"
 #include "VulkanSwapchain.hpp"
 #include "VulkanGraphicsPipeline.hpp"
+#include "VulkanCommandManager.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -34,6 +35,7 @@ namespace kds {
 		RAII<VkInstance> _instance{vkDestroyInstance, _instance, nullptr};
 
 		RAII<VkDevice> _device{vkDestroyDevice, _device, nullptr};
+		VkQueue _presentQueue{};
 		std::vector<VkQueue> _graphicsQueues{};
 		std::vector<VkQueue> _computeQueues{};
 		std::vector<VkQueue> _transferQueues{};
@@ -42,9 +44,11 @@ namespace kds {
 		RAII<VkSurfaceKHR> _surface{vkDestroySurfaceKHR, _instance, _surface, nullptr};
 
 		VulkanSwapchain _vulkanSwapchain{this};
-		RAII<VkFramebuffer> _framebuffer{vkDestroyFramebuffer, _device, _framebuffer, nullptr};
+		std::vector<RAII<VkFramebuffer>> _framebuffers{};
 
 		VulkanGraphicsPipeline _graphicsPipeline{this};
+
+		VulkanCommandManager _commandManager{this};
 
 		RAII<VkDebugReportCallbackEXT> _debugReportCallback{vkDestroyDebugReportCallbackEXT, _instance, _debugReportCallback, nullptr};
 

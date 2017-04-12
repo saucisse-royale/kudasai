@@ -70,6 +70,12 @@ namespace kds {
 			VkQueueFlagBits family;
 		};
 
+		QueueInfos presentQueueInfos{
+			.count = 1,
+			.priorities = {1.0f},
+			.family = VK_QUEUE_GRAPHICS_BIT
+		};
+
 		QueueInfos graphicsQueueInfos{
 			.count = 1,
 			.priorities = {1.0f},

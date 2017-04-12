@@ -23,9 +23,9 @@ namespace kds {
 	void Window::init(WindowConfig const& windowConfig, const std::function<void(const Drawer&)>& renderCallback)
 	{
 		ContextConfig contextConfig{};
-		contextConfig.debugConfig.enabled = true;
+		contextConfig.debugConfig.enabled = false;
 		contextConfig.debugConfig.severity = DebugConfig::FULL;
-		contextConfig.deviceQueueConfig.graphicsQueueInfos.count = 16;
+		contextConfig.deviceQueueConfig.graphicsQueueInfos.count = 1;
 		//contextConfig.deviceQueueConfig.computeQueueInfos.count = 15;
 		contextConfig.windowConfig = windowConfig;
 		init(contextConfig, renderCallback);
@@ -60,6 +60,7 @@ namespace kds {
 
 	void Window::close()
 	{
+		//vkDeviceWaitIdle(_vulkanContext._device);
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
@@ -75,6 +76,8 @@ namespace kds {
 	void Window::render()
 	{
 		renderCallback(*this);
+		_vulkanContext._commandManager.draw();
+		vkDeviceWaitIdle(_vulkanContext._device);
 	}
 
 	void Window::drawRectangle(double x, double y, double width, double height)

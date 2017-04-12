@@ -3,7 +3,7 @@
 #include <functional>
 #include <iostream>
 
-#define RAII_NULL_HANDLE 0
+#define RAII_NULL_HANDLE (0)
 
 namespace kds {
 

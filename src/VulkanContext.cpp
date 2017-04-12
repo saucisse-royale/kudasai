@@ -28,12 +28,10 @@ namespace kds {
 		pipelineConfig.fragmentPath = "src/shaders/frag.spv";
 		pipelineConfig.vertexPath = "src/shaders/vert.spv";
 		_graphicsPipeline.create(pipelineConfig);
-
-		/*for (size_t i{}; i < 100; ++i) {
-			_vulkanSwapchain.recreate();
-		}*/
-
-		//_initFramebuffer();
+		_initFramebuffer();
+		_commandManager.createCommandBuffers();
+		_commandManager.createSemaphore();
+		_commandManager.recordCommandBuffers();
 	}
 
 	void VulkanContext::_loadLayers() noexcept {
@@ -169,8 +167,9 @@ namespace kds {
 
 
 		// Retrieve every created queue from the created device
-		for (size_t i{}; i < deviceQueueConfig.graphicsQueueInfos.count; ++i) {
-			vkGetDeviceQueue(_device, deviceQueueConfig.graphicsQueueInfos.index, i, &_graphicsQueues[i]);
+		vkGetDeviceQueue(_device, deviceQueueConfig.graphicsQueueInfos.index, 0, &_presentQueue);
+		for (size_t i{1}; i < deviceQueueConfig.graphicsQueueInfos.count; ++i) {
+			vkGetDeviceQueue(_device, deviceQueueConfig.graphicsQueueInfos.index, i, &_graphicsQueues[i - 1]);
 		}
 
 		for (size_t i{}; i < deviceQueueConfig.computeQueueInfos.count; ++i) {
@@ -195,12 +194,30 @@ namespace kds {
 			exit(1);
 		}
 
+
+
 	}
 
-	void _initFramebuffer() noexcept {
-		VkFramebufferCreateInfo framebufferInfo{};
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		return;
+	void VulkanContext::_initFramebuffer() noexcept {
+		_framebuffers.resize(_vulkanSwapchain._swapchainImageViews.size());
+		for (auto&& f : _framebuffers) {
+			f.setDeleter(vkDestroyFramebuffer, _device, f, nullptr);
+		}
+
+		VkResult result{};
+		for (size_t i{}; i < _framebuffers.size(); ++i) {
+			VkFramebufferCreateInfo framebufferInfo{};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = _graphicsPipeline._renderPass;
+			framebufferInfo.attachmentCount = 1; // 1 framebuffer <-> 1 swapchain image view
+			framebufferInfo.pAttachments = &_vulkanSwapchain._swapchainImageViews[i];
+			framebufferInfo.width = _vulkanSwapchain._swapchainExtent.width;
+			framebufferInfo.height = _vulkanSwapchain._swapchainExtent.height;
+			framebufferInfo.layers = 1;
+
+			result = vkCreateFramebuffer(_device, &framebufferInfo, nullptr, _framebuffers[i].reset());
+			KDS_CHECK_RESULT(result, "Failed to create a framebuffer");
+		}
 	}
 
 	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanContext::debugCallback(

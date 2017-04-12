@@ -9,6 +9,7 @@ namespace kds {
 		_vulkanContext{vulkanContext},
 		_vertexShaderModule{vkDestroyShaderModule, _vulkanContext->_device, _vertexShaderModule, nullptr},
 		_fragmentShaderModule{vkDestroyShaderModule, _vulkanContext->_device, _fragmentShaderModule, nullptr},
+		_renderPass{vkDestroyRenderPass, _vulkanContext->_device, _renderPass, nullptr},
 		_pipeline{vkDestroyPipeline, _vulkanContext->_device, _pipeline, nullptr}
 	{}
 
@@ -53,7 +54,7 @@ namespace kds {
 		return pipelineLayout;
 	}
 
-	RAII<VkRenderPass> VulkanGraphicsPipeline::createRenderPass() const noexcept {
+	void VulkanGraphicsPipeline::createRenderPass() noexcept {
 		std::array<VkAttachmentDescription, 1> attachmentDescriptions{};
 		attachmentDescriptions[0].flags = 0;
 		attachmentDescriptions[0].format = _vulkanContext->_vulkanSwapchain._surfaceFormat.format;
@@ -62,7 +63,7 @@ namespace kds {
 		attachmentDescriptions[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		attachmentDescriptions[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachmentDescriptions[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachmentDescriptions[0].initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		attachmentDescriptions[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		attachmentDescriptions[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		std::array<VkAttachmentReference, 1> attachmentReferences{};
@@ -81,7 +82,13 @@ namespace kds {
 		subpassDescriptions[0].preserveAttachmentCount = 0;
 		subpassDescriptions[0].pPreserveAttachments = nullptr;
 
-		RAII<VkRenderPass> renderPass{vkDestroyRenderPass, _vulkanContext->_device, renderPass, nullptr};
+		std::array<VkSubpassDependency, 1> subpassDependencies{};
+		subpassDependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		subpassDependencies[0].dstSubpass = 0;
+		subpassDependencies[0].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependencies[0].srcAccessMask = 0;
+		subpassDependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -89,18 +96,17 @@ namespace kds {
 		renderPassInfo.pAttachments = attachmentDescriptions.data();
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = subpassDescriptions.data();
-		renderPassInfo.dependencyCount = 0;
-		renderPassInfo.pDependencies = nullptr;
+		renderPassInfo.dependencyCount = subpassDependencies.size();
+		renderPassInfo.pDependencies = subpassDependencies.data();
 
-		auto result = vkCreateRenderPass(_vulkanContext->_device, &renderPassInfo, nullptr, renderPass.reset());
+		auto result = vkCreateRenderPass(_vulkanContext->_device, &renderPassInfo, nullptr, _renderPass.reset());
 		KDS_CHECK_RESULT(result, "Failed to create a render pass.");
-
-		return renderPass;
 	}
 
 	void VulkanGraphicsPipeline::create(VulkanGraphicsPipelineConfig const& pipelineConfig) noexcept {
 		createVertexShaderModule(pipelineConfig.vertexPath);
 		createFragmentShaderModule(pipelineConfig.fragmentPath);
+		createRenderPass();
 
 		std::array<VkPipelineShaderStageCreateInfo, 2> shaderStageInfos{};
 
@@ -192,7 +198,6 @@ namespace kds {
 		colorBlendStateInfo.blendConstants[3] = 0.0f;
 
 		auto pipelineLayout = createPipelineLayout();
-		auto renderPass = createRenderPass();
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -208,7 +213,7 @@ namespace kds {
 		pipelineInfo.pColorBlendState = &colorBlendStateInfo;
 		pipelineInfo.pDynamicState = nullptr;
 		pipelineInfo.layout = pipelineLayout;
-		pipelineInfo.renderPass = renderPass;
+		pipelineInfo.renderPass = _renderPass;
 		pipelineInfo.subpass = 0;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineInfo.basePipelineIndex = -1;

@@ -20,7 +20,7 @@ namespace kds {
 			bool rasterizerDiscardEnabled{false};
 			VkPolygonMode polygonMode{VK_POLYGON_MODE_FILL};
 			VkCullModeFlags cullMode{VK_CULL_MODE_BACK_BIT};
-			VkFrontFace frontFace{VK_FRONT_FACE_COUNTER_CLOCKWISE};
+			VkFrontFace frontFace{VK_FRONT_FACE_CLOCKWISE};
 			bool depthBiasEnabled{false};
 			float depthBiasConstantFactor{};
 			float depthBiasClamp{};
@@ -45,13 +45,15 @@ namespace kds {
 		void createFragmentShaderModule(std::string const& path) noexcept;
 
 		RAII<VkPipelineLayout> createPipelineLayout() const noexcept;
-		RAII<VkRenderPass> createRenderPass() const noexcept;
+		void createRenderPass() noexcept;
 
 
 		// non owning pointer to the vulkan context
 		VulkanContext* _vulkanContext{};
 		RAII<VkShaderModule> _vertexShaderModule;
 		RAII<VkShaderModule> _fragmentShaderModule;
+
+		RAII<VkRenderPass> _renderPass;
 
 		RAII<VkPipeline> _pipeline;
 

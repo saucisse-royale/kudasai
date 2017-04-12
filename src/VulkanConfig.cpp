@@ -58,6 +58,8 @@ namespace kds {
 		std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertiesCount);
 		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertiesCount, queueFamilyProperties.data());
 
+		++graphicsQueueInfos.count; // add one for the present queue
+
 		// We need to create a CreateInfo Structure for each requested queue family
 		for (size_t i{}; i < queueFamiliesCount; ++i) { // queueFamiliesCount == 4
 			QueueInfos* currentQueueInfo{nullptr}; // We can't use a reference here because the init value is determined in the following switch statement
@@ -65,7 +67,6 @@ namespace kds {
 			switch (i) {
 			case 0:
 				currentQueueInfo = &graphicsQueueInfos;
-
 				break;
 			case 1:
 				currentQueueInfo = &computeQueueInfos;
