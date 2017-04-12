@@ -67,7 +67,7 @@ namespace kds {
 
 	std::vector<Input> Window::input()
 	{
-		// TODO glfwPollEvents
+		glfwPollEvents();
 		std::vector<Input>& inputs = this->inputs;
 		this->inputs = std::vector<Input>{};
 		return inputs;

@@ -11,6 +11,9 @@
 # Fortran module files
 *.mod
 
+# compiled shaders
+*.spv
+
 # visualstudio
 .vs/
 *.sln

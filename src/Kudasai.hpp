@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include <chrono>
 #include <functional>
 #include "Window.hpp"

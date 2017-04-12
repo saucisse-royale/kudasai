@@ -1,6 +1,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Kudasai.hpp"
+#include <thread>
 
 namespace kds {
 
@@ -22,15 +23,14 @@ void Kudasai::loop() {
 	time_t lastFrame = getNanos();
 	accumulator = 0;
 	while (!glfwWindowShouldClose(window.window)) {
-		glfwPollEvents();
 		time_t newTime = getNanos();
 		time_t deltaTime = newTime - lastFrame;
 		lastFrame = newTime;
 		accumulator += deltaTime;
-		/*while (accumulator >= TICK_TIME) { /// OMG FIX THIS SA FAIT TOUT CRASHERéééé~Ao
+		while (accumulator >= TICK_TIME) {
 			engine.logic(window.input());
 			accumulator -= TICK_TIME;
-		}*/
+		}
 		alpha = (float) accumulator / TICK_TIME; // update alpha for #render()
 		window.render(); // calls render
 	}

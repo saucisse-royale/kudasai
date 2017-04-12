@@ -70,21 +70,12 @@ namespace kds {
 			VkQueueFlagBits family;
 		};
 
-		QueueInfos presentQueueInfos{
-			.count = 1,
-			.priorities = {1.0f},
-			.family = VK_QUEUE_GRAPHICS_BIT
-		};
+		QueueInfos presentQueueInfos{1, {}, {1.0f}, VK_QUEUE_GRAPHICS_BIT };
+		QueueInfos graphicsQueueInfos{1, {}, {1.0f}, VK_QUEUE_GRAPHICS_BIT };
 
-		QueueInfos graphicsQueueInfos{
-			.count = 1,
-			.priorities = {1.0f},
-			.family = VK_QUEUE_GRAPHICS_BIT
-		};
-
-		QueueInfos computeQueueInfos{.family = VK_QUEUE_COMPUTE_BIT};
-		QueueInfos transferQueueInfos{.family = VK_QUEUE_TRANSFER_BIT};
-		QueueInfos sparseBindingQueueInfos{.family = VK_QUEUE_SPARSE_BINDING_BIT};
+		QueueInfos computeQueueInfos{{}, {}, {}, VK_QUEUE_COMPUTE_BIT};
+		QueueInfos transferQueueInfos{{}, {}, {}, VK_QUEUE_TRANSFER_BIT};
+		QueueInfos sparseBindingQueueInfos{{}, {}, {}, VK_QUEUE_SPARSE_BINDING_BIT};
 
 	private:
 		uint32_t queueFamiliesCount{4}; // !! DON'T CHANGE THIS

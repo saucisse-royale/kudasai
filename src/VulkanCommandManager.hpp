@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include "VulkanLoader.hpp"
 #include "RAII.hpp"
 

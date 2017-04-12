@@ -6,6 +6,7 @@
 #include "VulkanConfig.hpp"
 
 #include <string>
+#include <array>
 
 namespace kds {
 
