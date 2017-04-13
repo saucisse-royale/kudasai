@@ -7,10 +7,15 @@ Projet de jeu vidéo en C++ avec Vulkan avec MaitreVanDiest et delthas.
 - Vulkan SDK : tout est inclus dans le dépôt, lié dynamiquement via le loader
 - GLFW : headers inclus dans le dépot, liaison statique via pkg-config
 - CMake : outil d'automatisation de build, à installer
+
 ### Unix
+- pkg-config : outil d'aide au build de certaines libraries
 - Dlfnc : header inclus dans le dépôt
+- GLFW3 : à installer et compiler, voir [ici](http://www.glfw.org/download.html)
+
 ### Windows
 Pas de dépendances particulières
+
 ### MacOS
 Non supporté.
 
