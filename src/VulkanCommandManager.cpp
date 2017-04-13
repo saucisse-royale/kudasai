@@ -103,6 +103,7 @@ namespace kds {
 		imageSubRessourceRange.levelCount = 1;
 		imageSubRessourceRange.baseMipLevel = 0;
 
+
 		VkClearValue clearValue{0.3f, 0.2f, 0.6f, 0.0f};
 
 		VkResult result{};

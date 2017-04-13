@@ -2,22 +2,26 @@
 
 Projet de jeu vidéo en C++ avec Vulkan avec MaitreVanDiest et delthas.
 
-# Dépendances
-## Cross plateforme
+## Dépendances
+### Cross plateforme
 - Vulkan SDK : tout est inclus dans le dépôt, lié dynamiquement via le loader
-- GLFW : headers inclus dans le dépot, liaison statique dans le makefile via pkg-config
-## Unix
-- Dlfnc : pour ouvrir les bibliothèques à l'execution. À installer et à ajouter au path
-## Windows
-- Loader Windows
-## MacOS
-C'est non. MacOS ne supporte pas Vulkan.
+- GLFW : headers inclus dans le dépot, liaison statique via pkg-config
+- CMake : outil d'automatisation de build, à installer
+### Unix
+- Dlfnc : header inclus dans le dépôt
+### Windows
+Pas de dépendances particulières
+### MacOS
+Non supporté.
 
-#Build
-## Unix
-Aller dans le dossier du dépôt avec un terminal et taper la commande :
+##Build
+Il faut avoir installé une toolchain C++. Les fichiers exécutables seront placés dans le dossier ```bin```.
+### Unix
+Aller dans le dossier du dépôt avec un terminal et taper les commandes suivantes :
 ```shell
+cmake -DCMAKE_BUILD_TYPE=Release . # pour la version release, ou
+cmake -DCMAKE_BUILD_TYPE=Debug . # pour la version debug
 make
 ```
-## Windows
-heu...
+### Windows
+Lancer CMake et indiquer le dossier du dépôt pour l'emplacement du code source et l'emplacement où placer les fichiers binaires. Indiquer éventuellement sa toolchain si demandé. Cliquer sur configurer puis générer.

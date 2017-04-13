@@ -25,8 +25,8 @@ namespace kds {
 		_vulkanSwapchain.init();
 
 		VulkanGraphicsPipelineConfig pipelineConfig{};
-		pipelineConfig.fragmentPath = "src/shaders/frag.spv";
-		pipelineConfig.vertexPath = "src/shaders/vert.spv";
+		pipelineConfig.fragmentPath = "shaders/test.frag.spv";
+		pipelineConfig.vertexPath = "shaders/test.vert.spv";
 		_graphicsPipeline.create(pipelineConfig);
 		_initFramebuffer();
 		_commandManager.createCommandBuffers();

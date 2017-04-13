@@ -1,29 +1,14 @@
-# ---> C++
-# Compiled Object files
-*.slo
 *.lo
 *.o
 *.obj
 
-# Precompiled Headers
-*.gch
-*.pch
-# Fortran module files
-*.mod
 
-# compiled shaders
-*.spv
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*
+.idea/
 
-# visualstudio
-.vs/
-*.sln
-*.cln
-*.vcxproj
-*.vcxproj.*
-*.pdb
-*.tlog
-*.ilk
-*.log
-build/
-pdb/
-kudasai.exe
+bin/kudasai
+bin/kudasai.exe
+
+bin/shaders/
