@@ -5,6 +5,38 @@
 
 namespace kds {
 
+    void Drawer::drawLine(double x1, double y1, double x2, double y2) {
+        drawLineCenter((x1 + x2) / 2, (y1 + y2) / 2, std::sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)), std::atan2(y2 - y1, x2 - x1));
+    }
+
+	void Drawer::fillCircle(double x, double y, double radius) {
+		fillCircle(x, y, radius, true);
+	}
+
+	void Drawer::fillCircle(double x, double y, double radius, bool centered) {
+		if (centered) {
+			fillCircleBorder(x, y, radius, 0);
+		} else {
+			fillCircleBorder(x + radius / 2, y + radius / 2, radius, 0);
+		}
+	}
+
+	void Drawer::fillCircleBorder(double x, double y, double radius, double width, bool centered) {
+		if (centered) {
+			fillCircleBorder(x, y, radius, width);
+		} else {
+			fillCircleBorder(x + radius / 2, y + radius / 2, radius, width);
+		}
+	}
+
+	void Drawer::fillRectangle(double x, double y, double width, double height, bool centered) {
+		if (centered) {
+			fillRectangle(x, y, width, height);
+		} else {
+			fillRectangle(x + width / 2, y + height / 2, width, height);
+		}
+	}
+
 	Window::Window()
 	{
 	}
@@ -13,11 +45,6 @@ namespace kds {
 	Window::~Window()
 	{
 		close();
-	}
-
-	// callbacks
-	void Window::resize_callback(GLFWwindow *window, int width, int height) {
-		return;
 	}
 
 	void Window::init(WindowConfig const& windowConfig, const std::function<void(const Drawer&)>& renderCallback)
@@ -34,10 +61,13 @@ namespace kds {
 	void Window::init(ContextConfig const& contextConfig, const std::function<void(const Drawer&)>& renderCallback)
 	{
 		this->renderCallback = renderCallback;
-		// TODO init opengl and show window
-		// TODO notamment register les inputs callbacks et la logique pour les mettre dans inputs
+
+        glfwSetErrorCallback([](int error, const char* description){
+            std::cerr << "KDS ERROR: GLFW error: " << error << " - " << description << std::endl;
+        });
+
 		if (!glfwInit()) {
-			std::cerr << "KDS FATAL: failed to init GLFW\n";
+			std::cerr << "KDS FATAL: failed to init GLFW" << std::endl;
 			exit(1);
 		}
 
@@ -53,7 +83,23 @@ namespace kds {
 		}
 
 		glfwSetWindowUserPointer(window, this);
-		glfwSetWindowSizeCallback(window, resize_callback);
+
+		glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height) {
+
+        });
+
+        glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
+            static_cast<Window*>(glfwGetWindowUserPointer(window))->inputs.push_back(Input{Input::SCROLL, std::lround(-yoffset)});
+        });
+        glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+            static_cast<Window*>(glfwGetWindowUserPointer(window))->inputs.push_back(Input{Input::KEY, std::pair<std::size_t, bool>{scancode, action == GLFW_PRESS}});
+        });
+        glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
+            static_cast<Window*>(glfwGetWindowUserPointer(window))->inputs.push_back(Input{Input::MOVE, std::pair<double, double>{xpos, ypos}});
+        });
+        glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+            static_cast<Window*>(glfwGetWindowUserPointer(window))->inputs.push_back(Input{Input::MOUSE, std::pair<std::size_t, bool>{button, action == GLFW_PRESS}});
+        });
 
 		_vulkanContext.create(contextConfig, window);
 	}
@@ -79,13 +125,28 @@ namespace kds {
 		_vulkanContext._commandManager.draw();
 	}
 
-	void Window::drawRectangle(double x, double y, double width, double height)
-	{
-		// TODO
-	}
+    void Window::pushTranslate(double x, double y) {
 
-	void Window::drawOval(double x, double y, double width, double height)
-	{
-		// TODO
-	}
+    }
+
+    void Window::popTranslate() {
+
+    }
+
+    void Window::drawLineCenter(double x, double y, double length, double angle) {
+
+    }
+
+    void Window::fillCircleBorder(double x, double y, double radius, double width) {
+
+    }
+
+    void Window::fillRectangle(double x, double y, double width, double height) {
+
+    }
+
+    void Window::setColor(Color color) {
+
+    }
+
 } // namespace kds

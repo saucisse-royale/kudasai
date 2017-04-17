@@ -161,7 +161,7 @@ namespace kds {
 		rasterizerStateInfo.depthBiasSlopeFactor = rasterizerConfig.depthBiasSlopeFactor;
 		rasterizerStateInfo.lineWidth = rasterizerConfig.lineWidth;
 
-		// TODO change when textures will be supported
+		// TODO change when textures are supported
 		VkPipelineMultisampleStateCreateInfo multisampleStateInfo{};
 		multisampleStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
