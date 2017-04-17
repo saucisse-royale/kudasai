@@ -10,8 +10,8 @@ struct Color {
     std::uint8_t b;
     std::uint8_t a;
     Color();
-    Color(const std::uint8_t& red, const std::uint8_t& green, const std::uint8_t& blue);
-    Color(const std::uint8_t& red, const std::uint8_t& green, const std::uint8_t& blue, const std::uint8_t& alpha);
+    Color(std::uint8_t red, std::uint8_t green, std::uint8_t blue);
+    Color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha);
     Color(const std::uint32_t& color);
     std::uint32_t toInteger();
     bool operator==(const Color& other) const;

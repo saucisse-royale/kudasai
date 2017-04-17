@@ -14,7 +14,7 @@ namespace kds
 
     }
 
-    Color::Color(const std::uint8_t& red, const std::uint8_t& green, const std::uint8_t& blue) :
+    Color::Color(std::uint8_t red, std::uint8_t green, std::uint8_t blue) :
             r(red),
             g(green),
             b(blue),
@@ -24,7 +24,7 @@ namespace kds
     }
 
 
-    Color::Color(const std::uint8_t& red, const std::uint8_t& green, const std::uint8_t& blue, const std::uint8_t& alpha) :
+    Color::Color(std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha) :
             r(red),
             g(green),
             b(blue),
