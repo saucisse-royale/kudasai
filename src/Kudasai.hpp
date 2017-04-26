@@ -28,7 +28,7 @@ namespace kds {
 		void initUi();
 		void init();
 		void loop();
-		void render(const Drawer& drawer);
+		void render(Drawer& drawer);
 		void close();
 
 		time_t getNanos();

@@ -17,6 +17,9 @@ namespace kds {
 	class Drawer {
 	public:
 		virtual ~Drawer() {}
+    
+    virtual std::uint32_t getWidth() = 0;
+    virtual std::uint32_t getHeight() = 0;
 
 		virtual void pushTranslate(double x, double y) = 0;
 		virtual void popTranslate() = 0;
@@ -40,24 +43,29 @@ namespace kds {
 	public:
 		Window();
 		~Window();
-		void init(ContextConfig const& contextConfig, const std::function<void(const Drawer&)>& renderCallback);
-		void init(WindowConfig const& windowConfig, const std::function<void(const Drawer&)>& renderCallback);
+		void init(ContextConfig const& contextConfig, const std::function<void(Drawer&)>& renderCallback);
+		void init(WindowConfig const& windowConfig, const std::function<void(Drawer&)>& renderCallback);
 		void close();
 		std::vector<Input> input();
 		void render();
 
 		GLFWwindow* window;
+    
+    virtual void pushTranslate(double x, double y) override;
+    virtual void popTranslate() override;
+    virtual void drawLineCenter(double x, double y, double length, double angle) override;
+    virtual void fillCircleBorder(double x, double y, double radius, double width) override;
+    virtual void fillRectangle(double x, double y, double width, double height) override;
+    virtual void setColor(Color color) override;
+    virtual std::uint32_t getWidth() override;
+    virtual std::uint32_t getHeight() override;
 
 	private:
+		bool closed{true};
 		VulkanContext _vulkanContext;
-
-		std::function<void(const Drawer&)> renderCallback;
+    std::uint32_t width;
+    std::uint32_t height;
+		std::function<void(Drawer&)> renderCallback;
 		std::vector<Input> inputs{};
-        virtual void pushTranslate(double x, double y) override;
-        virtual void popTranslate() override;
-        virtual void drawLineCenter(double x, double y, double length, double angle) override;
-        virtual void fillCircleBorder(double x, double y, double radius, double width) override;
-        virtual void fillRectangle(double x, double y, double width, double height) override;
-        virtual void setColor(Color color) override;
     };
 } // namespace kds

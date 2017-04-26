@@ -2,6 +2,7 @@
 
 #include "Kudasai.hpp"
 #include <thread>
+#include <iostream>
 
 namespace kds {
 
@@ -22,13 +23,16 @@ void Kudasai::init() {
 void Kudasai::loop() {
 	time_t lastFrame = getNanos();
 	accumulator = 0;
-	while (!glfwWindowShouldClose(window.window)) {
+	while (true) {
 		time_t newTime = getNanos();
 		time_t deltaTime = newTime - lastFrame;
 		lastFrame = newTime;
 		accumulator += deltaTime;
 		while (accumulator >= TICK_TIME) {
-			engine.logic(window.input());
+			if(engine.logic(window.input()))
+        return;
+      if(glfwWindowShouldClose(window.window))
+        return;
 			accumulator -= TICK_TIME;
 		}
 		alpha = (float) accumulator / TICK_TIME; // update alpha for #render()
@@ -36,7 +40,7 @@ void Kudasai::loop() {
 	}
 }
 
-void Kudasai::render(const Drawer& drawer) {
+void Kudasai::render(Drawer& drawer) {
 	engine.render(drawer, alpha);
 }
 

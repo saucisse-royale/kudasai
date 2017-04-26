@@ -1,26 +1,13 @@
 #pragma once
 
+#include <array>
 #include <vector>
 #include "Window.hpp"
 #include "Input.hpp"
+#include "Entity.hpp"
+#include "Map.hpp"
 
 namespace kds {
-
-	enum Tile
-	{
-		GROUND_BLACK,
-		GROUND_RED,
-	};
-
-	struct Map
-	{
-		Map() = default;
-		inline Map(std::size_t width_, std::size_t height_) : width(width_), height(height_), map(width*height) {}
-		std::size_t width;
-		std::size_t height;
-		std::vector<Tile*> map;
-		inline Tile** operator[](std::size_t x) { return &map[x*height]; }
-	};
 
 	class Engine
 	{
@@ -28,10 +15,20 @@ namespace kds {
 		Engine();
 		~Engine();
 		void init();
-		void logic(const std::vector<Input>& inputs);
-		void render(const Drawer& drawer, float alpha);
+		bool logic(const std::vector<Input>& inputs);
+		void render(Drawer& drawer, float alpha);
 	private:
-		int level;
+    static const std::uint32_t tileSize{15};
+    static const std::uint32_t maxLevels{10};
+    void createLevel();
+		std::uint32_t level{0};
 		Map map;
+    std::vector<Missile> missiles{};
+    std::vector<Monster> enemies{};
+    Monster player{0, 0, 0};
+		int playerXState{0};
+    bool inputLeft{};
+    bool inputRight{};
+    bool inputUp{};
 	};
 }
