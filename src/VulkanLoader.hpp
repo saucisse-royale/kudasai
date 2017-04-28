@@ -7,75 +7,82 @@
 /// (Not requiered if the app is statically linked with vulkan)
 
 #if defined(__linux__) || defined(__UNIX__)
-	#define KDS_OS_LINUX
-	#define VK_USE_PLATFORM_XCB_KHR
-	#define VULKAN_LIBRARY_TYPE void*
-	#include <dlfcn.h>
+#define KDS_OS_LINUX
+#define VK_USE_PLATFORM_XCB_KHR
+#define VULKAN_LIBRARY_TYPE void*
+#include <dlfcn.h>
 #elif defined(__MINGW32__) || defined(_WIN32)
-	#define KDS_OS_WINDOWS
-    #define VK_USE_PLATFORM_WIN32_KHR
-	#define VULKAN_LIBRARY_TYPE HMODULE
-	#include <Windows.h>
+#define KDS_OS_WINDOWS
+#define VK_USE_PLATFORM_WIN32_KHR
+#define VULKAN_LIBRARY_TYPE HMODULE
+#include <Windows.h>
 #endif
 
 #define VK_NO_PROTOTYPES
-#include <vulkan/vulkan.h>
 #include <iostream>
+#include <vulkan/vulkan.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 namespace kds {
-	namespace loader {
-		/// init the Vulkan loader
-		/// Retrives the global level function pointers from it
-		///
-		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool init(VULKAN_LIBRARY_TYPE lib);
+    namespace loader {
+        /// init the Vulkan loader
+        /// Retrives the global level function pointers from it
+        ///
+        /// \return false if anything couldn't be loaded, of true if everything went fine
+        bool init(VULKAN_LIBRARY_TYPE lib);
 
-		/// Terminates the Vulkan loader
-		/// No vulkan functions can be called after calling this
-		void terminate(VULKAN_LIBRARY_TYPE lib);
+        /// Terminates the Vulkan loader
+        /// No vulkan functions can be called after calling this
+        void terminate(VULKAN_LIBRARY_TYPE lib);
 
-		/// Loads the instance-level function pointers
-		///
-		/// \param instance A VALID vulkan instance (after creating it with vkCreateInstance)
-		///
-		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool loadInstanceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
+        /// Loads the instance-level function pointers
+        ///
+        /// \param instance A VALID vulkan instance (after creating it with vkCreateInstance)
+        ///
+        /// \return false if anything couldn't be loaded, of true if everything went fine
+        bool loadInstanceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
 
-		/// Loads the instance-level debug extensions function pointers
-		///
-		/// The requiered extensions MUST be enabled BEFORE calling this function, or the program will segfault
-		///
-		/// \param instance A VALID vulkan instance (after creating it with vkCreateInstance)
-		///
-		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool loadInstanceLevelDebugFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
+        /// Loads the instance-level debug extensions function pointers
+        ///
+        /// The requiered extensions MUST be enabled BEFORE calling this function, or the program will segfault
+        ///
+        /// \param instance A VALID vulkan instance (after creating it with vkCreateInstance)
+        ///
+        /// \return false if anything couldn't be loaded, of true if everything went fine
+        bool loadInstanceLevelDebugFunctions(VULKAN_LIBRARY_TYPE lib, VkInstance instance);
 
-		/// Loads the device-level function pointers
-		///
-		/// \param device A VALID vulkan device (after creating it with vkCreateDevice)
-		///
-		/// \return false if anything couldn't be loaded, of true if everything went fine
-		bool loadDeviceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkDevice device);
+        /// Loads the device-level function pointers
+        ///
+        /// \param device A VALID vulkan device (after creating it with vkCreateDevice)
+        ///
+        /// \return false if anything couldn't be loaded, of true if everything went fine
+        bool loadDeviceLevelFunctions(VULKAN_LIBRARY_TYPE lib, VkDevice device);
 
-	} // namespace loader
+    } // namespace loader
 } // namespace kds
 
 // Macros to shorten the code
 
-#define KDS_CHECK_LOADING(fun) if(!fun) {\
-	std::cerr << "KDS FATAL: failed loading " << #fun << '\n';\
-	return 0;\
-}
+#define KDS_CHECK_LOADING(fun)                                     \
+    if (!fun) {                                                    \
+        std::cerr << "KDS FATAL: failed loading " << #fun << '\n'; \
+        return 0;                                                  \
+    }
 
 #define KDS_DECL_EXTERN(fun) extern PFN_##fun fun;
 #define KDS_DECL(fun) PFN_##fun fun;
-#define KDS_LOAD_GLOBAL_LEVEL(fun) fun = reinterpret_cast<PFN_##fun>(vkGetInstanceProcAddr(nullptr, #fun)); KDS_CHECK_LOADING(fun);
-#define KDS_LOAD_INSTANCE_LEVEL(fun) fun = reinterpret_cast<PFN_##fun>(vkGetInstanceProcAddr(instance, #fun)); KDS_CHECK_LOADING(fun);
-#define KDS_LOAD_DEVICE_LEVEL(fun) fun = reinterpret_cast<PFN_##fun>(vkGetDeviceProcAddr(device, #fun)); KDS_CHECK_LOADING(fun);
+#define KDS_LOAD_GLOBAL_LEVEL(fun)                                           \
+    fun = reinterpret_cast<PFN_##fun>(vkGetInstanceProcAddr(nullptr, #fun)); \
+    KDS_CHECK_LOADING(fun);
+#define KDS_LOAD_INSTANCE_LEVEL(fun)                                          \
+    fun = reinterpret_cast<PFN_##fun>(vkGetInstanceProcAddr(instance, #fun)); \
+    KDS_CHECK_LOADING(fun);
+#define KDS_LOAD_DEVICE_LEVEL(fun)                                        \
+    fun = reinterpret_cast<PFN_##fun>(vkGetDeviceProcAddr(device, #fun)); \
+    KDS_CHECK_LOADING(fun);
 
 // declare exported function
 KDS_DECL_EXTERN(vkGetInstanceProcAddr);

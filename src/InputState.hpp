@@ -1,11 +1,4 @@
 #pragma once
 
-
 class InputState {
-
-
-
 };
-
-
-
